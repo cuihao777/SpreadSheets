@@ -1,19 +1,28 @@
-import './index.scss'
-import './index.css'
+import './css/index.scss'
+import { watcher } from './Clipboard/Watcher'
+import React, { useEffect, useState } from 'react'
+import { render } from 'react-dom'
 
-class HelloWorld {
-    constructor() {
-        this.element = document.createElement('div');
-        document.body.appendChild(this.element);
+const Hello = React.memo(() => {
+    const [data, setData] = useState([]);
 
-        setInterval(() => {
-            this.render();
-        }, 1000);
-    }
+    useEffect(() => {
+        watcher(data => {
+            setData(data);
+        });
+    }, []);
 
-    render() {
-        this.element.innerHTML = new Date().toLocaleString();
-    }
-}
+    return (
+        <table class="test">
+            <tbody>
+            {data.map(row => (
+                <tr>
+                    {row.map(cell => <td>{cell}</td>)}
+                </tr>
+            ))}
+            </tbody>
+        </table>
+    );
+});
 
-new HelloWorld();
+render(<Hello/>, document.body);
