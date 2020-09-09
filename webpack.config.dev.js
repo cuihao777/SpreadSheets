@@ -12,7 +12,7 @@ module.exports = {
         new webpack.HotModuleReplacementPlugin()
     ],
     devServer: {
-        contentBase: './dist',
+        contentBase: path.join(__dirname, "dist"),
         hot: true
     }
 };

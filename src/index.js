@@ -1,18 +1,34 @@
-import './index.scss'
-import './index.css'
+import './css/index.scss'
+import { watcher } from './Clipboard/Watcher'
 
 class HelloWorld {
     constructor() {
-        this.element = document.createElement('div');
-        document.body.appendChild(this.element);
+        this.container = document.createElement("div");
+        this.container.className = "container";
+        document.body.appendChild(this.container);
 
-        setInterval(() => {
-            this.render();
-        }, 1000);
+        watcher(this.onPaste, this.container);
     }
 
-    render() {
-        this.element.innerHTML = new Date().toLocaleString();
+    onPaste = (data) => {
+        this.container.innerHTML = "";
+        const table = document.createElement("table");
+        const tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+
+        data.forEach(record => {
+            const tr = document.createElement("tr");
+            tbody.appendChild(tr);
+
+            record.forEach(value => {
+                const td = document.createElement("td");
+                td.innerText = value;
+                tr.appendChild(td);
+            });
+        });
+
+        table.className = "test";
+        this.container.appendChild(table);
     }
 }
 
