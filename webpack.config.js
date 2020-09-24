@@ -1,19 +1,33 @@
 const path = require('path');
+const webpack = require('webpack');
 const WebpackBar = require('webpackbar');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const {VueLoaderPlugin} = require("vue-loader");
 
-module.exports = {
-    mode: 'production',
+module.exports = (env = {}) => ({
+    mode: env.prod ? 'production' : "development",
     module: {
         rules: [
-            { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: "babel-loader"
+            },
+            {
+                test: /\.vue$/,
+                exclude: /node_modules/,
+                loader: 'vue-loader'
+            },
             {
                 test: /\.s[ac]ss$/i,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {hmr: !env.prod}
+                    },
                     'css-loader',
                     'sass-loader'
                 ]
@@ -21,7 +35,10 @@ module.exports = {
             {
                 test: /\.less$/,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {hmr: !env.prod}
+                    },
                     'css-loader',
                     'less-loader'
                 ]
@@ -29,7 +46,10 @@ module.exports = {
             {
                 test: /\.css$/i,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {hmr: !env.prod}
+                    },
                     'css-loader'
                 ]
             }
@@ -38,13 +58,17 @@ module.exports = {
     plugins: [
         new WebpackBar(),
         new FriendlyErrorsWebpackPlugin(),
+        new VueLoaderPlugin(),
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             minify: false
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[chunkHash].bundle.css',
-            chunkFilename: '[id].[chunkHash].bundle.css'
+            filename: '[name].[chunkHash].bundle.css'
+        }),
+        new webpack.DefinePlugin({
+            __VUE_OPTIONS_API__: true,
+            __VUE_PROD_DEVTOOLS__: false
         })
     ],
     stats: {
@@ -53,11 +77,16 @@ module.exports = {
         errors: false,
         children: false
     },
+    resolve: {
+        alias: {
+            vue: "@vue/runtime-dom"
+        }
+    },
     entry: {
         app: './src/index.js'
     },
     output: {
         filename: '[name].[hash].bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist')
     },
-};
+});

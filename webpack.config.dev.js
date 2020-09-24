@@ -1,18 +1,17 @@
 const path = require('path');
 const webpack = require('webpack');
-const config = require('./webpack.config');
+const prodConfig = require('./webpack.config');
 
-module.exports = {
-    ...config,
-    mode: 'development',
-    devtool: 'source-map',
-    plugins: [
-        ...config.plugins,
-        new webpack.NamedModulesPlugin(),
-        new webpack.HotModuleReplacementPlugin()
-    ],
-    devServer: {
+module.exports = (env = {}) => {
+    const config = prodConfig(env);
+
+    config.devtool = "source-map";
+    config.plugins.push(new webpack.NamedModulesPlugin());
+    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    config.devServer = {
         contentBase: path.join(__dirname, "dist"),
         hot: true
-    }
+    };
+
+    return config;
 };
