@@ -53,6 +53,11 @@ module.exports = {
         errors: false,
         children: false
     },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'src/')
+        }
+    },
     entry: {
         app: './src/index.js'
     },
