@@ -41,7 +41,9 @@ module.exports = (env = { prod: false }) => ({
         new FriendlyErrorsWebpackPlugin(),
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            minify: false
+            minify: false,
+            title: 'SpreadSheets Demo',
+            template: 'index.html'
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[chunkHash].bundle.css',

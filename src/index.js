@@ -6,10 +6,6 @@ import { watcher } from './Clipboard/Watcher'
 
 class HelloWorld {
     constructor() {
-        const test = document.createElement("div");
-        test.className = "test-box";
-        document.body.appendChild(test);
-
         this.data = {
             rowInfo: [
                 { column: 30 },
@@ -37,7 +33,7 @@ class HelloWorld {
             ]
         };
 
-        this.container = new Container(test, {});
+        this.container = new Container(document.getElementById("app"), {});
         this.canvas = new Canvas(this.container, {});
         this.vScrollBar = new VerticalScrollBar(this.container);
         this.vScrollBar.height = 1000;
