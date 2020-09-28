@@ -1,14 +1,36 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-size: 19px;
     color: blue;
 }
 
-div.container {
-    border: 1px dotted gray;
-    padding: 8px;
-    display: block;
-    min-width: 100px;
-    min-height: 100px;
+.test-box {
+    width: 800px;
+    height: 600px;
+}
+
+.spread-container {
+    box-sizing: border-box;
+    border: 1px solid gray;
+    position: relative;
+
+    .viewport {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        overflow: hidden;
+    }
+
+    .vscrollbar {
+    }
 }
 
 table.test {
