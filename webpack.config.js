@@ -5,8 +5,9 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-module.exports = {
-    mode: 'production',
+module.exports = (env = { prod: false }) => ({
+    mode: env.prod ? 'production' : "development",
+    devtool: env.prod ? undefined : 'eval-source-map',
     module: {
         rules: [
             { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
@@ -53,6 +54,11 @@ module.exports = {
         errors: false,
         children: false
     },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'src/')
+        }
+    },
     entry: {
         app: './src/index.js'
     },
@@ -60,4 +66,4 @@ module.exports = {
         filename: '[name].[hash].bundle.js',
         path: path.resolve(__dirname, 'dist'),
     },
-};
+});
