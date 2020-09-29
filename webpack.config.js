@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = (env = { prod: false }) => ({
     mode: env.prod ? 'production' : "development",
@@ -39,6 +40,10 @@ module.exports = (env = { prod: false }) => ({
     plugins: [
         new WebpackBar(),
         new FriendlyErrorsWebpackPlugin(),
+        new ESLintPlugin({
+            files: ["src"],
+            extensions: ["js", "jsx", "ts", "tsx"]
+        }),
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             minify: false,

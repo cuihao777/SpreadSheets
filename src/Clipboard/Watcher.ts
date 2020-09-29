@@ -1,8 +1,12 @@
-import { parse } from './Parser'
+import {parse} from './Parser'
 
-export function watcher(fn, element = document.body) {
-    function onPaste(event) {
-        const { clipboardData } = event;
+export function watcher(fn: () => void, element = document.body) {
+    function onPaste(event: ClipboardEvent) {
+        if (event.clipboardData === null) {
+            return;
+        }
+
+        const {clipboardData} = event;
 
         for (let i = 0; i < clipboardData.items.length; i++) {
             const item = clipboardData.items[i];
