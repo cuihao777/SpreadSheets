@@ -44,33 +44,69 @@ class Canvas {
         };
     }
 
-    drawGrid() {
+    drawGrid(header,data,options) {
+        const maxWidth = this.size.width;
+        const maxHeight = this.size.height;
+        const {defaultColumnWidth,defaultRowHeight} = options;
 
+        let rowEndpoint = 0;
+        let columnEndpoint = 0;
+
+        for (let i = 0; i < header.length; i++) {
+            const field = header[i];
+            const fieldWidth = field.width ? field.width : defaultColumnWidth;
+
+            rowEndpoint += fieldWidth;
+
+            if (rowEndpoint > maxWidth) {
+                rowEndpoint = maxWidth;
+                break;
+            }
+        }
+
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            columnEndpoint += row.height ? row.height : defaultRowHeight;
+
+            if (columnEndpoint > maxHeight) {
+                columnEndpoint = maxHeight;
+                break;
+            }
+        }
+
+        for (let i = 0, s = 0; i < data.length; i++) {
+            const row = data[i];
+            const rowHeight = row.height ? row.height : defaultRowHeight;
+            s += rowHeight;
+
+            this.context.save();
+            this.context.translate(-0.5, -0.5);
+            this.context.moveTo(0, s);
+            this.context.lineTo(rowEndpoint, s);
+            this.context.strokeStyle = "#e6e6e6";
+            this.context.stroke();
+            this.context.restore();
+        }
+
+        for (let i = 0, s = 0; i < header.length; i++) {
+            let column = header[i];
+            const columnWidth = column.width ? column.width : defaultColumnWidth;
+            s += columnWidth;
+
+            this.context.save();
+            this.context.translate(-0.5, -0.5);
+            this.context.moveTo(s, 0);
+            this.context.lineTo(s, columnEndpoint);
+            this.context.strokeStyle = "#e6e6e6";
+            this.context.stroke();
+            this.context.restore();
+        }
     }
 
     renderText(text, x, y) {
         this.context.font = "14px bold 等线";
         this.context.fillStyle = "#000000";
         this.context.fillText(text, x, y);
-    }
-
-    clear() {
-        const { context, canvas } = this;
-
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.save();
-        context.translate(0.5, 0.5);
-
-        context.moveTo(0, 0);
-        context.lineTo(0, canvas.height - 1);
-        context.lineTo(canvas.width - 1, canvas.height - 1);
-        context.lineTo(canvas.width - 1, 0);
-        context.lineTo(0, 0);
-        context.lineWidth = 1;
-        context.strokeStyle = "#d4d4d4";
-        context.stroke();
-
-        context.restore();
     }
 }
 
