@@ -1,12 +1,15 @@
-import {parse} from './Parser'
+import { parse } from './Parser'
 
-export function watcher(fn: () => void, element = document.body) {
+type Callback = (data: string[][]) => void;
+type StopEventCallback = () => void;
+
+export function watcher(fn: Callback, element = document.body): StopEventCallback {
     function onPaste(event: ClipboardEvent) {
         if (event.clipboardData === null) {
             return;
         }
 
-        const {clipboardData} = event;
+        const { clipboardData } = event;
 
         for (let i = 0; i < clipboardData.items.length; i++) {
             const item = clipboardData.items[i];

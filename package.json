@@ -7,7 +7,7 @@
     "scripts": {
         "start": "webpack-dev-server --config webpack.config.dev.js --open",
         "build": "webpack --env.prod",
-        "check-types": "tsc"
+        "fix": "eslint --fix"
     },
     "devDependencies": {
         "@babel/core": "^7.11.6",

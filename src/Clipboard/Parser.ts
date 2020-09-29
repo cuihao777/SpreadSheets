@@ -1,4 +1,4 @@
-export function parse(text) {
+export function parse(text: string): string[][] {
     const data = [];
     let row = 0;
     let field = "";

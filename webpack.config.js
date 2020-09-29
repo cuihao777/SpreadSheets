@@ -69,7 +69,7 @@ module.exports = (env = { prod: false }) => ({
         }
     },
     entry: {
-        app: './src/index.js'
+        app: './src/index.ts'
     },
     output: {
         filename: '[name].[hash].bundle.js',

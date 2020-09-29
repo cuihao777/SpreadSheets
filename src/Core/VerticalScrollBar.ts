@@ -1,10 +1,11 @@
+import Container from "./Container";
+
 class VerticalScrollBar {
-    /**
-     * Init
-     *
-     * @param container {Container}
-     */
-    constructor(container) {
+    $height: number;
+    scrollBar: HTMLElement;
+    content: HTMLElement;
+
+    constructor(container: Container) {
         this.$height = 1;
 
         this.scrollBar = document.createElement("div");
@@ -19,30 +20,30 @@ class VerticalScrollBar {
         container.element.appendChild(this.scrollBar);
 
         this.content = document.createElement("div");
-        this.content.style.height = this.$height;
+        this.content.style.height = `${this.$height}px`;
         this.content.style.width = "1px";
         this.scrollBar.appendChild(this.content);
 
-        this.scrollBar.addEventListener("scroll", event => {
-            console.log(event.target.scrollTop);
+        this.scrollBar.addEventListener("scroll", () => {
+            console.log(this.scrollBar.scrollTop);
         });
     }
 
-    get visible() {
+    get visible(): boolean {
         const style = getComputedStyle(this.content, null);
         return parseInt(style.width) > 1;
     }
 
-    get height() {
+    get height(): number {
         return this.$height;
     }
 
-    set height(height) {
+    set height(height: number) {
         this.$height = height;
         this.content.style.height = `${height}px`;
     }
 
-    set top(top) {
+    set top(top: number) {
         this.scrollBar.scrollTop = top;
     }
 }

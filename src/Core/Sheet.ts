@@ -1,7 +1,18 @@
+import { Header, Row } from "./SpreadSheets";
+
 let sheetId = 1;
 
+interface SheetOptions {
+    name?: string;
+    header: Header[];
+}
+
 class Sheet {
-    constructor(options = {}) {
+    name: string;
+    header: Header[];
+    data: Row[];
+
+    constructor(options: SheetOptions) {
         this.name = options.name || 'Sheet ' + sheetId;
         this.header = options.header || [];
         this.data = [];
@@ -9,11 +20,11 @@ class Sheet {
         sheetId++;
     }
 
-    getData() {
+    getData(): Row[] {
         return this.data;
     }
 
-    setData(data) {
+    setData(data: Row[]): void {
         this.data = data;
     }
 }

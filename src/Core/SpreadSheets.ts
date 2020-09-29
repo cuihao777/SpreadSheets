@@ -1,12 +1,38 @@
 import Container from "./Container";
 import Canvas from './Canvas';
 import VerticalScrollBar from './VerticalScrollBar';
-import { watcher } from '@/Clipboard/Watcher';
+import { watcher } from '../Clipboard/Watcher';
+
+export interface Header {
+    title?: string;
+    width?: number;
+}
+
+export interface Row {
+    cells: (string | number)[];
+    height?: number;
+}
+
+export interface SpreadSheetsOptions {
+    defaultColumnWidth?: number;
+    defaultRowHeight?: number;
+    header?: Header[];
+}
 
 class SpreadSheets {
     sheets = [];
 
-    constructor(el, options = {}) {
+    defaultOptions: SpreadSheetsOptions;
+
+    options: SpreadSheetsOptions;
+
+    data: Row[];
+
+    container: Container;
+    canvas: Canvas;
+    vScrollBar: VerticalScrollBar;
+
+    constructor(el: string | Element, options: SpreadSheetsOptions = {}) {
         this.defaultOptions = {
             defaultColumnWidth: 100,
             defaultRowHeight: 28,
@@ -44,11 +70,11 @@ class SpreadSheets {
             { cells: [1, 2, 3, 4, 5, 6, 7, 8] }
         ];
 
-        if (!(el instanceof HTMLElement)) {
+        if (!(el instanceof Element)) {
             el = document.querySelector(el);
         }
 
-        this.container = new Container(el, {});
+        this.container = new Container(el as HTMLElement, {});
         this.canvas = new Canvas(this.container, {});
         this.vScrollBar = new VerticalScrollBar(this.container);
 

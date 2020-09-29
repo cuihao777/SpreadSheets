@@ -1,20 +1,23 @@
 import Container from "./Container";
+import { Header, Row, SpreadSheetsOptions } from "./SpreadSheets";
+
+interface CanvasOptions {
+    width?: number,
+    height?: number
+}
+
+interface CanvasSize {
+    width: number,
+    height: number
+}
 
 class Canvas {
-    /**
-     * Context for Canvas
-     *
-     * @type {CanvasRenderingContext2D}
-     */
-    context = null;
+    options: CanvasOptions;
+    container: Container;
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
 
-    /**
-     * Init
-     *
-     * @param container {Container}
-     * @param options {Object}
-     */
-    constructor(container, options = {}) {
+    constructor(container: Container, options: CanvasOptions = {}) {
         const defaultOptions = {
             width: -1,
             height: -1
@@ -37,17 +40,17 @@ class Canvas {
         });
     }
 
-    get size() {
+    get size(): CanvasSize {
         return {
             width: this.canvas.width,
             height: this.canvas.height
         };
     }
 
-    drawGrid(header,data,options) {
+    drawGrid(header: Header[], data: Row[], options: SpreadSheetsOptions): void {
         const maxWidth = this.size.width;
         const maxHeight = this.size.height;
-        const {defaultColumnWidth,defaultRowHeight} = options;
+        const { defaultColumnWidth, defaultRowHeight } = options;
 
         let rowEndpoint = 0;
         let columnEndpoint = 0;
@@ -89,7 +92,7 @@ class Canvas {
         }
 
         for (let i = 0, s = 0; i < header.length; i++) {
-            let column = header[i];
+            const column = header[i];
             const columnWidth = column.width ? column.width : defaultColumnWidth;
             s += columnWidth;
 
@@ -103,7 +106,7 @@ class Canvas {
         }
     }
 
-    renderText(text, x, y) {
+    renderText(text: string, x: number, y: number): void {
         this.context.font = "14px bold 等线";
         this.context.fillStyle = "#000000";
         this.context.fillText(text, x, y);

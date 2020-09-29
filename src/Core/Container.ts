@@ -1,24 +1,39 @@
 import ResizeObserver from 'resize-observer-polyfill';
 import throttle from 'lodash/throttle';
-import Events from 'events';
+import { EventEmitter } from 'events';
+
+interface ContainerOptions {
+    width?: number,
+    height?: number
+}
+
+interface ContainerSize {
+    width: number,
+    height: number
+}
 
 class Container {
     /**
      * Event Manager
-     *
-     * @type {EventEmitter}
      */
-    event = new Events();
+    event = new EventEmitter();
 
     /**
      * Parent Node
-     *
-     * @type {HTMLElement}
      */
-    parentNode = null;
+    parentNode: HTMLElement = null;
 
-    constructor(parentNode, options) {
-        const defaultOptions = {
+    /**
+     * Container Options
+     */
+    options: ContainerOptions;
+
+    element: HTMLElement;
+
+    viewport: HTMLElement;
+
+    constructor(parentNode: HTMLElement, options: ContainerOptions = {}) {
+        const defaultOptions: ContainerOptions = {
             width: -1,
             height: -1
         };
@@ -27,16 +42,16 @@ class Container {
 
         this.element = document.createElement("div");
         this.element.className = "spread-container";
-        this.element.style.width = this.options.width !== -1 ? this.options.width : '100%';
-        this.element.style.height = this.options.height !== -1 ? this.options.height : '100%';
+        this.element.style.width = this.options.width !== -1 ? `${this.options.width}px` : '100%';
+        this.element.style.height = this.options.height !== -1 ? `${this.options.height}px` : '100%';
 
         this.parentNode = parentNode;
         parentNode.appendChild(this.element);
 
         this.onParentNodeResize = throttle(this.onParentNodeResize, 100);
         const resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
-                this.onParentNodeResize(entry.target);
+            for (const entry of entries) {
+                this.onParentNodeResize(entry.target as HTMLElement);
             }
         });
 
@@ -47,7 +62,7 @@ class Container {
         this.element.appendChild(this.viewport);
     }
 
-    onParentNodeResize(parentNode) {
+    onParentNodeResize(parentNode: HTMLElement): void {
         const clientWidth = parentNode.clientWidth;
         const clientHeight = parentNode.clientHeight;
 
@@ -61,14 +76,14 @@ class Container {
         this.event.emit("resize", params);
     }
 
-    get viewPortSize() {
+    get viewPortSize(): ContainerSize {
         return {
             width: this.parentNode.clientWidth,
             height: this.parentNode.clientHeight
         };
     }
 
-    appendViewPort(viewPort) {
+    appendViewPort(viewPort: HTMLElement): void {
         this.viewport.appendChild(viewPort);
     }
 }
