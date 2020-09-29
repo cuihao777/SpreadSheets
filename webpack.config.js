@@ -59,7 +59,8 @@ module.exports = (env = { prod: false }) => ({
         modules: false,
         errorDetails: false,
         errors: false,
-        children: false
+        children: false,
+        warnings: false
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', 'jsx', '.json', 'css', 'scss'],
