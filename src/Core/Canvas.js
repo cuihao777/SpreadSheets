@@ -1,5 +1,3 @@
-import Container from "./Container";
-
 class Canvas {
     /**
      * Context for Canvas
@@ -20,7 +18,7 @@ class Canvas {
             height: -1
         };
 
-        this.options = { ...defaultOptions, ...options };
+        this.options = {...defaultOptions, ...options};
 
         this.container = container;
 
@@ -44,10 +42,10 @@ class Canvas {
         };
     }
 
-    drawGrid(header,data,options) {
+    drawGrid(header, data, options) {
         const maxWidth = this.size.width;
         const maxHeight = this.size.height;
-        const {defaultColumnWidth,defaultRowHeight} = options;
+        const {defaultColumnWidth, defaultRowHeight} = options;
 
         let rowEndpoint = 0;
         let columnEndpoint = 0;

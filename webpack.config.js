@@ -3,14 +3,15 @@ const WebpackBar = require('webpackbar');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
-module.exports = (env = { prod: false }) => ({
+module.exports = (env = {prod: false}) => ({
     mode: env.prod ? 'production' : "development",
     devtool: env.prod ? undefined : 'eval-source-map',
     module: {
         rules: [
-            { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
+            {test: /\.jsx?$/, exclude: /node_modules/, loader: "babel-loader"},
             {
                 test: /\.s[ac]ss$/i,
                 use: [
@@ -39,6 +40,10 @@ module.exports = (env = { prod: false }) => ({
     plugins: [
         new WebpackBar(),
         new FriendlyErrorsWebpackPlugin(),
+        new ESLintPlugin({
+            files: ["src"],
+            extensions: ["js", "jsx"]
+        }),
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             minify: false,
