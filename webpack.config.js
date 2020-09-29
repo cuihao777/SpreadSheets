@@ -10,7 +10,7 @@ module.exports = (env = { prod: false }) => ({
     devtool: env.prod ? undefined : 'eval-source-map',
     module: {
         rules: [
-            { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
+            { test: /\.(ts|js)x?$/, exclude: /node_modules/, loader: "babel-loader" },
             {
                 test: /\.s[ac]ss$/i,
                 use: [
@@ -57,6 +57,7 @@ module.exports = (env = { prod: false }) => ({
         children: false
     },
     resolve: {
+        extensions: ['.ts', '.tsx', '.js', 'jsx', '.json', 'css', 'scss'],
         alias: {
             '@': path.resolve(__dirname, 'src/')
         }
