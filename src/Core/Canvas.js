@@ -157,7 +157,7 @@ class Canvas {
 
     setLineStyle() {
         this.attr({
-            strokeStyle: '#e6e6e6',
+            strokeStyle: '#d4d4d4',
             lineWidth: 1
         });
     }

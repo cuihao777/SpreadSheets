@@ -1,6 +1,6 @@
-import Container from "./Container";
+import Table from "./Table";
 // import Canvas from './Canvas';
-import VerticalScrollBar from './VerticalScrollBar';
+// import VerticalScrollBar from './VerticalScrollBar';
 import { watcher } from '@/Clipboard/Watcher';
 
 class SpreadSheets {
@@ -19,7 +19,7 @@ class SpreadSheets {
             { title: "A", width: 100 },
             { title: "B", width: 100 },
             { title: "C", width: 100 },
-            { title: "D", width: 100 },
+            { title: "D", width: 133 },
             { title: "E", width: 100 },
             { title: "F", width: 100 },
             { title: "G", width: 100 },
@@ -48,15 +48,15 @@ class SpreadSheets {
             el = document.querySelector(el);
         }
 
-        this.container = new Container(el, {});
-        this.container.setData(this.options.header, this.data);
-        this.container.drawGrid();
-        this.vScrollBar = new VerticalScrollBar(this.container);
+        this.table = new Table(el, {});
+        this.table.setData(this.options.header, this.data);
+        this.table.drawGrid();
+        // this.vScrollBar = new VerticalScrollBar(this.container);
 
-        this.container.event.on("resize", () => {
-            // this.canvas.renderText("hello", 100, 100);
-            // this.canvas.drawGrid(this.options.header, this.data, this.options);
-        });
+        // this.container.event.on("resize", () => {
+        //     // this.canvas.renderText("hello", 100, 100);
+        //     // this.canvas.drawGrid(this.options.header, this.data, this.options);
+        // });
 
         watcher(() => null, document.body);
     }

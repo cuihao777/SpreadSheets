@@ -16,9 +16,10 @@ body {
     padding: 20px;
 }
 
-.spread-container {
+.spread-table {
     box-sizing: border-box;
     border: 1px solid #e0e2e4;
+    overflow: hidden;
     position: relative;
 
     .viewport {
@@ -30,7 +31,7 @@ body {
         overflow: hidden;
     }
 
-    .vscrollbar {
+    .v-scrollbar {
     }
 }
 

@@ -1,4 +1,4 @@
-class VerticalScrollBar {
+class HorizontalScrollBar {
     /**
      * Scrollbar HTML-Element
      *
@@ -18,14 +18,14 @@ class VerticalScrollBar {
 
     constructor() {
         this.el = document.createElement("div");
-        this.el.className = "v-scrollbar";
+        this.el.className = "h-scrollbar";
 
         Object.assign(this.el.style, {
             position: 'absolute',
             right: "0",
-            top: "0",
+            left: "0",
             bottom: "0",
-            overflowY: "scroll"
+            overflowX: "scroll"
         });
 
         this.content = document.createElement("div");
@@ -68,18 +68,18 @@ class VerticalScrollBar {
      *
      * @returns {number}
      */
-    getTop() {
-        return this.el.scrollTop;
+    getLeft() {
+        return this.el.scrollLeft;
     }
 
     /**
      * Set Scrollbar Position
      *
-     * @param top {number}
+     * @param left {number}
      */
-    setTop(top) {
-        this.el.scrollTop = top;
+    setLeft(left) {
+        this.el.scrollLeft = left;
     }
 }
 
-export default VerticalScrollBar;
+export default HorizontalScrollBar;
