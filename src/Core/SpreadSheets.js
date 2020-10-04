@@ -1,5 +1,5 @@
 import Container from "./Container";
-import Canvas from './Canvas';
+// import Canvas from './Canvas';
 import VerticalScrollBar from './VerticalScrollBar';
 import { watcher } from '@/Clipboard/Watcher';
 
@@ -49,12 +49,13 @@ class SpreadSheets {
         }
 
         this.container = new Container(el, {});
-        this.canvas = new Canvas(this.container, {});
+        this.container.setData(this.options.header, this.data);
+        this.container.drawGrid();
         this.vScrollBar = new VerticalScrollBar(this.container);
 
         this.container.event.on("resize", () => {
-            this.canvas.renderText("hello", 100, 100);
-            this.canvas.drawGrid(this.options.header, this.data, this.options);
+            // this.canvas.renderText("hello", 100, 100);
+            // this.canvas.drawGrid(this.options.header, this.data, this.options);
         });
 
         watcher(() => null, document.body);

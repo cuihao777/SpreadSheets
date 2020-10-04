@@ -1,4 +1,26 @@
+let dpr = () => {
+    let ratio = window.devicePixelRatio || 1;
+    dpr = () => ratio;
+    return dpr();
+};
+
+function npx(px) {
+    return Math.trunc(px * dpr());
+}
+
+function npxLine(px) {
+    const n = npx(px);
+    return n > 0 ? n - 0.5 : 0.5;
+}
+
 class Canvas {
+    /**
+     * Canvas Element
+     *
+     * @type {HTMLCanvasElement}
+     */
+    canvas = null;
+
     /**
      * Context for Canvas
      *
@@ -6,106 +28,152 @@ class Canvas {
      */
     context = null;
 
+    size = {
+        width: 0,
+        height: 0
+    };
+
     /**
      * Init
      *
-     * @param container {Container}
      * @param options {Object}
      */
-    constructor(container, options = {}) {
+    constructor(options = {}) {
         const defaultOptions = {
-            width: -1,
-            height: -1
+            width: 0,
+            height: 0
         };
 
         this.options = {...defaultOptions, ...options};
 
-        this.container = container;
-
         this.canvas = document.createElement('canvas');
-        this.canvas.width = this.container.viewPortSize.width;
-        this.canvas.height = this.container.viewPortSize.height;
-        this.container.appendViewPort(this.canvas);
-
         this.context = this.canvas.getContext('2d');
+        this.resize(this.options.width, this.options.height);
+        this.context.scale(dpr(), dpr());
+    }
 
-        this.container.event.on("resize", (event) => {
-            this.canvas.width = event.viewPort.width;
-            this.canvas.height = event.viewPort.height;
+    resize(width, height) {
+        this.size.width = width;
+        this.size.height = height;
+        this.canvas.style.width = `${width}px`;
+        this.canvas.style.height = `${height}px`;
+        this.canvas.width = npx(width);
+        this.canvas.height = npx(height);
+    }
+
+    /**
+     * Insert in node
+     *
+     * @param node {HTMLElement}
+     */
+    appendTo(node) {
+        node.appendChild(this.canvas);
+    }
+
+    clear() {
+        const {width, height} = this.canvas;
+        this.context.clearRect(0, 0, width, height);
+        return this;
+    }
+
+    attr(options) {
+        Object.assign(this.context, options);
+        return this;
+    }
+
+    save() {
+        this.context.save();
+        this.context.beginPath();
+    }
+
+    restore() {
+        this.context.restore();
+        return this;
+    }
+
+    beginPath() {
+        this.context.beginPath();
+        return this;
+    }
+
+    translate(x, y) {
+        this.context.translate(npx(x), npx(y));
+        return this;
+    }
+
+    scale(x, y) {
+        this.context.scale(x, y);
+        return this;
+    }
+
+    clearRect(x, y, w, h) {
+        this.context.clearRect(x, y, w, h);
+        return this;
+    }
+
+    fillRect(x, y, w, h) {
+        this.context.fillRect(npx(x) - 0.5, npx(y) - 0.5, npx(w), npx(h));
+        return this;
+    }
+
+    fillText(text, x, y) {
+        this.context.fillText(text, npx(x), npx(y));
+        return this;
+    }
+
+    border(style, color) {
+        const {context} = this;
+        context.lineWidth = 1;
+        context.strokeStyle = color;
+
+        if (style === 'medium') {
+            context.lineWidth = npx(2) - 0.5;
+        } else if (style === 'thick') {
+            context.lineWidth = npx(3);
+        } else if (style === 'dashed') {
+            context.setLineDash([npx(3), npx(2)]);
+        } else if (style === 'dotted') {
+            context.setLineDash([npx(1), npx(1)]);
+        } else if (style === 'double') {
+            context.setLineDash([npx(2), 0]);
+        }
+        return this;
+    }
+
+    line(...xys) {
+        const {context} = this;
+        if (xys.length > 1) {
+            context.beginPath();
+            const [x, y] = xys[0];
+            context.moveTo(npxLine(x), npxLine(y));
+            for (let i = 1; i < xys.length; i += 1) {
+                const [x1, y1] = xys[i];
+                context.lineTo(npxLine(x1), npxLine(y1));
+            }
+            context.stroke();
+        }
+        return this;
+    }
+
+    setLineStyle() {
+        this.attr({
+            strokeStyle: '#e6e6e6',
+            lineWidth: 1
         });
     }
 
-    get size() {
-        return {
-            width: this.canvas.width,
-            height: this.canvas.height
-        };
-    }
-
-    drawGrid(header, data, options) {
-        const maxWidth = this.size.width;
-        const maxHeight = this.size.height;
-        const {defaultColumnWidth, defaultRowHeight} = options;
-
-        let rowEndpoint = 0;
-        let columnEndpoint = 0;
-
-        for (let i = 0; i < header.length; i++) {
-            const field = header[i];
-            const fieldWidth = field.width ? field.width : defaultColumnWidth;
-
-            rowEndpoint += fieldWidth;
-
-            if (rowEndpoint > maxWidth) {
-                rowEndpoint = maxWidth;
-                break;
-            }
-        }
-
-        for (let i = 0; i < data.length; i++) {
-            const row = data[i];
-            columnEndpoint += row.height ? row.height : defaultRowHeight;
-
-            if (columnEndpoint > maxHeight) {
-                columnEndpoint = maxHeight;
-                break;
-            }
-        }
-
-        for (let i = 0, s = 0; i < data.length; i++) {
-            const row = data[i];
-            const rowHeight = row.height ? row.height : defaultRowHeight;
-            s += rowHeight;
-
-            this.context.save();
-            this.context.translate(-0.5, -0.5);
-            this.context.moveTo(0, s);
-            this.context.lineTo(rowEndpoint, s);
-            this.context.strokeStyle = "#e6e6e6";
-            this.context.stroke();
-            this.context.restore();
-        }
-
-        for (let i = 0, s = 0; i < header.length; i++) {
-            let column = header[i];
-            const columnWidth = column.width ? column.width : defaultColumnWidth;
-            s += columnWidth;
-
-            this.context.save();
-            this.context.translate(-0.5, -0.5);
-            this.context.moveTo(s, 0);
-            this.context.lineTo(s, columnEndpoint);
-            this.context.strokeStyle = "#e6e6e6";
-            this.context.stroke();
-            this.context.restore();
-        }
-    }
-
-    renderText(text, x, y) {
-        this.context.font = "14px bold 等线";
-        this.context.fillStyle = "#000000";
-        this.context.fillText(text, x, y);
-    }
+    // moveTo(x, y) {
+    //     this.context.moveTo(npxLine(x), npxLine(y));
+    // }
+    //
+    // lineTo(x, y) {
+    //     this.context.lineTo(npxLine(x), npxLine(y));
+    // }
+    //
+    //
+    // stroke() {
+    //     this.context.stroke();
+    // }
 }
 
 export default Canvas;

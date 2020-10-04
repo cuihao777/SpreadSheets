@@ -1,6 +1,7 @@
 import ResizeObserver from 'resize-observer-polyfill';
 import throttle from 'lodash/throttle';
 import Events from 'events';
+import Canvas from './Canvas'
 
 class Container {
     /**
@@ -20,10 +21,12 @@ class Container {
     constructor(parentNode, options) {
         const defaultOptions = {
             width: -1,
-            height: -1
+            height: -1,
+            defaultColumnWidth: 100,
+            defaultRowHeight: 25
         };
 
-        this.options = { ...defaultOptions, ...options };
+        this.options = {...defaultOptions, ...options};
 
         this.element = document.createElement("div");
         this.element.className = "spread-container";
@@ -45,31 +48,78 @@ class Container {
         this.viewport = document.createElement("div");
         this.viewport.className = "viewport";
         this.element.appendChild(this.viewport);
+        this.canvas = new Canvas({
+            width: this.viewport.clientWidth,
+            height: this.viewport.clientHeight
+        });
+        this.canvas.appendTo(this.viewport);
     }
 
-    onParentNodeResize(parentNode) {
-        const clientWidth = parentNode.clientWidth;
-        const clientHeight = parentNode.clientHeight;
+    onParentNodeResize() {
+        const width = this.viewport.clientWidth;
+        const height = this.viewport.clientHeight;
 
-        const params = {
-            viewPort: {
-                width: clientWidth,
-                height: clientHeight
+        this.canvas.resize(width, height);
+        this.drawGrid();
+    }
+
+    setData(header, data) {
+        this.header = header;
+        this.data = data;
+    }
+
+    drawGrid() {
+        const maxWidth = this.canvas.size.width;
+        const maxHeight = this.canvas.size.height;
+        const {defaultColumnWidth, defaultRowHeight} = this.options;
+        const {header, data} = this;
+
+        let rowEndpoint = 0;
+        let columnEndpoint = 0;
+
+        for (let i = 0; i < header.length; i++) {
+            const field = header[i];
+            const fieldWidth = field.width ? field.width : defaultColumnWidth;
+
+            rowEndpoint += fieldWidth;
+
+            if (rowEndpoint > maxWidth) {
+                rowEndpoint = maxWidth;
+                break;
             }
-        };
+        }
 
-        this.event.emit("resize", params);
-    }
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            columnEndpoint += row.height ? row.height : defaultRowHeight;
 
-    get viewPortSize() {
-        return {
-            width: this.parentNode.clientWidth,
-            height: this.parentNode.clientHeight
-        };
-    }
+            if (columnEndpoint > maxHeight) {
+                columnEndpoint = maxHeight;
+                break;
+            }
+        }
 
-    appendViewPort(viewPort) {
-        this.viewport.appendChild(viewPort);
+        for (let i = 0, s = 0; i < data.length; i++) {
+            const row = data[i];
+            const rowHeight = row.height ? row.height : defaultRowHeight;
+            s += rowHeight;
+
+            this.canvas.save();
+            this.canvas.setLineStyle();
+            this.canvas.line([0, s], [rowEndpoint, s])
+            this.canvas.restore();
+        }
+
+        for (let i = 0, s = 0; i < header.length; i++) {
+            let column = header[i];
+            const columnWidth = column.width ? column.width : defaultColumnWidth;
+            s += columnWidth;
+
+            this.canvas.save();
+            this.canvas.setLineStyle();
+            this.canvas.line([s, 0], [s, columnEndpoint])
+            this.canvas.restore();
+        }
     }
 }
 
