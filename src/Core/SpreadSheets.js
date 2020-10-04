@@ -1,4 +1,5 @@
 import Table from "./Table";
+import DataSet from "./DataSet";
 // import Canvas from './Canvas';
 // import VerticalScrollBar from './VerticalScrollBar';
 import { watcher } from '@/Clipboard/Watcher';
@@ -16,9 +17,9 @@ class SpreadSheets {
         this.options = { ...this.defaultOptions, ...options };
 
         this.options.header = [
-            { title: "A", width: 100 },
-            { title: "B", width: 100 },
-            { title: "C", width: 100 },
+            { title: "Hello World", width: 100 },
+            { title: "Name", width: 100, align: 'left' },
+            { title: "Password", width: 100, align: 'right' },
             { title: "D", width: 133 },
             { title: "E", width: 100 },
             { title: "F", width: 100 },
@@ -49,8 +50,11 @@ class SpreadSheets {
         }
 
         this.table = new Table(el, {});
-        this.table.setData(this.options.header, this.data);
-        this.table.drawGrid();
+        this.table.setDataSet(new DataSet({
+            header: this.options.header,
+            data: this.data
+        }));
+        this.table.render();
         // this.vScrollBar = new VerticalScrollBar(this.container);
 
         // this.container.event.on("resize", () => {

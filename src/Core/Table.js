@@ -46,13 +46,20 @@ class Table {
      */
     hScroll = null;
 
+    /**
+     * Data
+     *
+     * @type {DataSet}
+     */
+    dataSet = null;
+
     constructor(container, options) {
         const defaultOptions = {
             width: -1,
             height: -1
         };
 
-        this.options = {...defaultOptions, ...options};
+        this.options = { ...defaultOptions, ...options };
 
         this.el = createTable(this.options.width, this.options.height);
         this.container = container;
@@ -88,22 +95,75 @@ class Table {
     }
 
     render() {
-        const width = this.el.clientWidth - this.vScroll.el.offsetWidth;
-        const height = this.el.clientHeight - this.hScroll.el.offsetHeight;
+        const width = this.el.clientWidth - this.vScroll.el.offsetWidth + 1;
+        const height = this.el.clientHeight - this.hScroll.el.offsetHeight + 1;
 
         this.canvas.resize(width, height);
-        this.drawGrid();
+
+        this.renderHeader();
+        this.renderGrid();
     }
 
-    setData(header, data) {
-        this.header = header;
-        this.data = data;
+    /**
+     * Set DataSet
+     *
+     * @param dataSet {DataSet}
+     */
+    setDataSet(dataSet) {
+        this.dataSet = dataSet;
     }
 
-    drawGrid() {
+    renderHeader() {
+        const header = this.dataSet.getHeader();
+        const { defaultRowHeight, defaultColumnWidth } = Config.Table;
+
+        let offsetX = 0;
+        for (let i = 0; i < header.length; i++) {
+            const field = header[i];
+            const title = field.title || '';
+            const align = ["left", "center", "right"].includes(field.align) ? field.align : 'center';
+
+            const rect = {
+                x: offsetX,
+                y: 0,
+                width: field.width || defaultColumnWidth,
+                height: defaultRowHeight
+            };
+
+            this.canvas.attr({ fillStyle: "#f4f5f8" });
+            this.canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+            const params = {
+                x: rect.x,
+                y: Math.trunc(rect.y + rect.height / 2),
+                textAlign: 'start',
+                textBaseline: 'middle',
+                fontSize: 13
+            };
+
+            if (align === 'center') {
+                params.x = Math.trunc(rect.x + rect.width / 2);
+                params.textAlign = 'center';
+            } else if (align === 'right') {
+                params.x = rect.x + rect.width;
+                params.textAlign = 'end';
+            }
+
+            this.canvas.attr({ fillStyle: "#000000" });
+            this.canvas.fillText({
+                text: title,
+                ...params
+            }, rect);
+
+            offsetX += rect.width;
+        }
+    }
+
+    renderGrid() {
         const maxWidth = this.canvas.size.width;
         const maxHeight = this.canvas.size.height;
-        const {header, data} = this;
+        const header = this.dataSet.getHeader();
+        const data = this.dataSet.getData();
 
         let rowEndpoint = 0;
         let columnEndpoint = 0;

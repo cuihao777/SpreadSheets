@@ -44,7 +44,7 @@ class Canvas {
             height: 0
         };
 
-        this.options = {...defaultOptions, ...options};
+        this.options = { ...defaultOptions, ...options };
 
         this.canvas = document.createElement('canvas');
         this.context = this.canvas.getContext('2d');
@@ -61,17 +61,8 @@ class Canvas {
         this.canvas.height = npx(height);
     }
 
-    /**
-     * Insert in node
-     *
-     * @param node {HTMLElement}
-     */
-    appendTo(node) {
-        node.appendChild(this.canvas);
-    }
-
     clear() {
-        const {width, height} = this.canvas;
+        const { width, height } = this.canvas;
         this.context.clearRect(0, 0, width, height);
         return this;
     }
@@ -116,13 +107,8 @@ class Canvas {
         return this;
     }
 
-    fillText(text, x, y) {
-        this.context.fillText(text, npx(x), npx(y));
-        return this;
-    }
-
     border(style, color) {
-        const {context} = this;
+        const { context } = this;
         context.lineWidth = 1;
         context.strokeStyle = color;
 
@@ -141,7 +127,7 @@ class Canvas {
     }
 
     line(...xys) {
-        const {context} = this;
+        const { context } = this;
         if (xys.length > 1) {
             context.beginPath();
             const [x, y] = xys[0];
@@ -153,6 +139,31 @@ class Canvas {
             context.stroke();
         }
         return this;
+    }
+
+    fillText({
+                 text, x, y,
+                 fontStyle = 'normal',
+                 fontVariant = 'normal',
+                 fontWeight = 'normal',
+                 fontSize = 13,
+                 textAlign = 'start',
+                 textBaseline = 'top'
+             }, rect) {
+        if (rect) {
+            this.context.save();
+            this.context.rect(npx(rect.x), npx(rect.y), npx(rect.width), npx(rect.height));
+            this.context.clip();
+        }
+
+        this.context.font = `${fontStyle} ${fontVariant} ${fontWeight} ${npx(fontSize)}px Arial`;
+        this.context.textBaseline = textBaseline;
+        this.context.textAlign = textAlign;
+        this.context.fillText(text, npx(x), npx(y));
+
+        if (rect) {
+            this.context.restore();
+        }
     }
 
     setLineStyle() {
