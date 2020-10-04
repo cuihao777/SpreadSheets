@@ -39,28 +39,21 @@ class HorizontalScrollBar {
     }
 
     /**
-     * Get Scrollbar Size
+     * Get Content Width
      *
-     * @returns {{width: number, height: number}}
+     * @returns {number}
      */
-    getSize() {
-        return this.size;
+    getWidth() {
+        return this.size.width;
     }
 
     /**
-     * Set Scrollbar Size
+     * Set Content Width
      *
      * @param width {number}
-     * @param height {number}
      */
-    setSize({width, height}) {
-        if (width) {
-            this.size.width = width;
-        }
-
-        if (height) {
-            this.size.height = height;
-        }
+    setWidth(width) {
+        this.size.width = width;
     }
 
     /**

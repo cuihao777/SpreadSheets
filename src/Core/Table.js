@@ -84,6 +84,10 @@ class Table {
     }
 
     onParentNodeResize() {
+        this.render();
+    }
+
+    render() {
         const width = this.el.clientWidth - this.vScroll.el.offsetWidth;
         const height = this.el.clientHeight - this.hScroll.el.offsetHeight;
 

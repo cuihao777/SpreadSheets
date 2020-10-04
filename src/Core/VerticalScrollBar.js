@@ -39,28 +39,21 @@ class VerticalScrollBar {
     }
 
     /**
-     * Get Scrollbar Size
+     * Get Content Height
      *
-     * @returns {{width: number, height: number}}
+     * @returns {number}
      */
     getSize() {
-        return this.size;
+        return this.size.height;
     }
 
     /**
-     * Set Scrollbar Size
+     * Set Content Height
      *
-     * @param width {number}
      * @param height {number}
      */
-    setSize({width, height}) {
-        if (width) {
-            this.size.width = width;
-        }
-
-        if (height) {
-            this.size.height = height;
-        }
+    setHeight(height) {
+        this.size.height = height;
     }
 
     /**

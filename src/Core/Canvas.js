@@ -161,19 +161,6 @@ class Canvas {
             lineWidth: 1
         });
     }
-
-    // moveTo(x, y) {
-    //     this.context.moveTo(npxLine(x), npxLine(y));
-    // }
-    //
-    // lineTo(x, y) {
-    //     this.context.lineTo(npxLine(x), npxLine(y));
-    // }
-    //
-    //
-    // stroke() {
-    //     this.context.stroke();
-    // }
 }
 
 export default Canvas;
