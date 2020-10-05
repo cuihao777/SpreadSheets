@@ -22,10 +22,19 @@ class VerticalScrollBar {
         this.content.style.height = `1px`;
         this.content.style.width = `1px`;
         this.el.appendChild(this.content);
+    }
 
-        this.el.addEventListener("scroll", event => {
-            console.log(event.target.scrollTop);
-        });
+    addEventListener(eventName, fn) {
+        fn.callback = () => {
+            fn.call(this, this.el.scrollTop);
+        };
+
+        this.el.addEventListener(eventName, fn.callback);
+    }
+
+    removeEventListener(eventName, fn) {
+        fn = fn.callback || fn;
+        this.el.removeEventListener(eventName, fn);
     }
 
     /**
@@ -33,7 +42,7 @@ class VerticalScrollBar {
      *
      * @returns {number}
      */
-    getHeight() {
+    get height() {
         return this.content.offsetHeight;
     }
 
@@ -42,7 +51,7 @@ class VerticalScrollBar {
      *
      * @param height {number}
      */
-    setHeight(height) {
+    set height(height) {
         this.content.style.height = `${height}px`;
     }
 
@@ -51,7 +60,7 @@ class VerticalScrollBar {
      *
      * @returns {number}
      */
-    getTop() {
+    get top() {
         return this.el.scrollTop;
     }
 
@@ -60,7 +69,7 @@ class VerticalScrollBar {
      *
      * @param top {number}
      */
-    setTop(top) {
+    set top(top) {
         this.el.scrollTop = top;
     }
 }

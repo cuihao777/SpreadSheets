@@ -22,10 +22,19 @@ class HorizontalScrollBar {
         this.content.style.height = `1px`;
         this.content.style.width = `1px`;
         this.el.appendChild(this.content);
+    }
 
-        this.el.addEventListener("scroll", event => {
-            console.log(event.target.scrollLeft);
-        });
+    addEventListener(eventName, fn) {
+        fn.callback = () => {
+            fn.call(this, this.el.scrollLeft);
+        };
+
+        this.el.addEventListener(eventName, fn.callback);
+    }
+
+    removeEventListener(eventName, fn) {
+        fn = fn.callback || fn;
+        this.el.removeEventListener(eventName, fn);
     }
 
     /**
@@ -33,7 +42,7 @@ class HorizontalScrollBar {
      *
      * @returns {number}
      */
-    getWidth() {
+    get width() {
         return this.content.offsetWidth;
     }
 
@@ -42,7 +51,7 @@ class HorizontalScrollBar {
      *
      * @param width {number}
      */
-    setWidth(width) {
+    set width(width) {
         this.content.style.width = `${width}px`;
     }
 
@@ -51,7 +60,7 @@ class HorizontalScrollBar {
      *
      * @returns {number}
      */
-    getLeft() {
+    get left() {
         return this.el.scrollLeft;
     }
 
@@ -60,7 +69,7 @@ class HorizontalScrollBar {
      *
      * @param left {number}
      */
-    setLeft(left) {
+    set left(left) {
         this.el.scrollLeft = left;
     }
 }

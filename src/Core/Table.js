@@ -76,9 +76,11 @@ class Table {
 
         this.vScroll = new VerticalScrollBar();
         this.el.appendChild(this.vScroll.el);
+        this.vScroll.addEventListener("scroll", this.onVerticalScroll);
 
         this.hScroll = new HorizontalScrollBar();
         this.el.appendChild(this.hScroll.el);
+        this.hScroll.addEventListener("scroll", this.HorizontalScroll);
 
         this.vScroll.el.style.bottom = `${this.hScroll.el.offsetHeight}px`;
         this.hScroll.el.style.right = `${this.vScroll.el.offsetWidth}px`;
@@ -93,6 +95,14 @@ class Table {
     onParentNodeResize() {
         this.render();
     }
+
+    onVerticalScroll = (top) => {
+        console.log(top);
+    };
+
+    HorizontalScroll = (left) => {
+        console.log(left);
+    };
 
     render() {
         const width = this.el.clientWidth - this.vScroll.el.offsetWidth + 1;
@@ -113,8 +123,8 @@ class Table {
     setDataSet(dataSet) {
         this.dataSet = dataSet;
 
-        this.hScroll.setWidth(dataSet.width);
-        this.vScroll.setHeight(dataSet.height);
+        this.hScroll.width = dataSet.getWidth();
+        this.vScroll.height = dataSet.getHeight();
     }
 
     renderHeader() {
