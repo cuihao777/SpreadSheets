@@ -130,11 +130,11 @@ class Table {
 
     renderHeader() {
         const header = this.dataSet.getHeader();
-        const { defaultRowHeight, defaultColumnWidth } = Config.Table;
+        const { defaultRowHeight, defaultColumnWidth, headerColor } = Config.Table;
         const lineNoWidth = this.getLineNoWidth();
 
         // Render Line-No Header
-        this.canvas.attr({ fillStyle: "#f4f5f8" });
+        this.canvas.attr({ fillStyle: headerColor });
         this.canvas.fillRect(0, 0, lineNoWidth, defaultRowHeight);
 
         let offsetX = lineNoWidth;
@@ -151,7 +151,7 @@ class Table {
                 height: defaultRowHeight
             };
 
-            this.canvas.attr({ fillStyle: "#f4f5f8" });
+            this.canvas.attr({ fillStyle: headerColor });
             this.canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
 
             const params = {
@@ -182,7 +182,7 @@ class Table {
 
     renderLineNo() {
         const data = this.dataSet.getData();
-        const { defaultRowHeight } = Config.Table;
+        const { defaultRowHeight, headerColor } = Config.Table;
 
         for (let i = 0, offsetY = defaultRowHeight; i < data.length; i++) {
             const width = this.getLineNoWidth();
@@ -195,7 +195,7 @@ class Table {
                 height: height
             };
 
-            this.canvas.attr({ fillStyle: "#f4f5f8" });
+            this.canvas.attr({ fillStyle: headerColor });
             this.canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
 
             const params = {
@@ -274,7 +274,7 @@ class Table {
         const maxHeight = this.canvas.size.height;
         const header = this.dataSet.getHeader();
         const data = this.dataSet.getData();
-        const { defaultRowHeight, defaultColumnWidth } = Config.Table;
+        const { defaultRowHeight, defaultColumnWidth, borderColor } = Config.Table;
 
         let rowEndpoint = 0;
         let columnEndpoint = 0;
@@ -320,7 +320,7 @@ class Table {
             s += rowHeight;
 
             this.canvas.save();
-            this.canvas.setLineStyle();
+            this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
             this.canvas.line([0, s], [rowEndpoint, s])
             this.canvas.restore();
         }
@@ -331,7 +331,7 @@ class Table {
             s += columnWidth;
 
             this.canvas.save();
-            this.canvas.setLineStyle();
+            this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
             this.canvas.line([s, 0], [s, columnEndpoint])
             this.canvas.restore();
         }
