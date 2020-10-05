@@ -6,16 +6,6 @@ class HorizontalScrollBar {
      */
     el = null;
 
-    /**
-     * Scrollbar Size
-     *
-     * @type {{width: number, height: number}}
-     */
-    size = {
-        width: 1,
-        height: 1
-    };
-
     constructor() {
         this.el = document.createElement("div");
         this.el.className = "h-scrollbar";
@@ -29,12 +19,12 @@ class HorizontalScrollBar {
         });
 
         this.content = document.createElement("div");
-        this.content.style.height = `${this.size.height}px`;
-        this.content.style.width = `${this.size.width}px`;
+        this.content.style.height = `1px`;
+        this.content.style.width = `1px`;
         this.el.appendChild(this.content);
 
         this.el.addEventListener("scroll", event => {
-            console.log(event.target.scrollTop);
+            console.log(event.target.scrollLeft);
         });
     }
 
@@ -44,7 +34,7 @@ class HorizontalScrollBar {
      * @returns {number}
      */
     getWidth() {
-        return this.size.width;
+        return this.content.offsetWidth;
     }
 
     /**
@@ -53,7 +43,7 @@ class HorizontalScrollBar {
      * @param width {number}
      */
     setWidth(width) {
-        this.size.width = width;
+        this.content.style.width = `${width}px`;
     }
 
     /**

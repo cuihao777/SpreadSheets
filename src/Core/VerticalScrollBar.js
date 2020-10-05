@@ -6,16 +6,6 @@ class VerticalScrollBar {
      */
     el = null;
 
-    /**
-     * Scrollbar Size
-     *
-     * @type {{width: number, height: number}}
-     */
-    size = {
-        width: 1,
-        height: 1
-    };
-
     constructor() {
         this.el = document.createElement("div");
         this.el.className = "v-scrollbar";
@@ -29,8 +19,8 @@ class VerticalScrollBar {
         });
 
         this.content = document.createElement("div");
-        this.content.style.height = `${this.size.height}px`;
-        this.content.style.width = `${this.size.width}px`;
+        this.content.style.height = `1px`;
+        this.content.style.width = `1px`;
         this.el.appendChild(this.content);
 
         this.el.addEventListener("scroll", event => {
@@ -43,8 +33,8 @@ class VerticalScrollBar {
      *
      * @returns {number}
      */
-    getSize() {
-        return this.size.height;
+    getHeight() {
+        return this.content.offsetHeight;
     }
 
     /**
@@ -53,7 +43,7 @@ class VerticalScrollBar {
      * @param height {number}
      */
     setHeight(height) {
-        this.size.height = height;
+        this.content.style.height = `${height}px`;
     }
 
     /**

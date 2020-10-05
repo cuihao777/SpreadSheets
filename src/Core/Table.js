@@ -112,6 +112,9 @@ class Table {
      */
     setDataSet(dataSet) {
         this.dataSet = dataSet;
+
+        this.hScroll.setWidth(dataSet.width);
+        this.vScroll.setHeight(dataSet.height);
     }
 
     renderHeader() {
@@ -171,9 +174,6 @@ class Table {
 
             for (let j = 0, offsetX = 0; j < cells.length; j++) {
                 const field = header[j];
-                if (field.width === undefined) {
-                    console.log(i, j);
-                }
                 const cellWidth = field.width || defaultColumnWidth;
                 const cellHeight = height;
                 const align = ["left", "center", "right"].includes(field.align) ? field.align : 'center';
