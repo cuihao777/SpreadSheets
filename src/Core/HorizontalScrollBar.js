@@ -26,7 +26,7 @@ class HorizontalScrollBar {
 
     addEventListener(eventName, fn) {
         fn.callback = () => {
-            fn.call(this, this.el.scrollLeft);
+            fn.call(this, this.left, this.width);
         };
 
         this.el.addEventListener(eventName, fn.callback);

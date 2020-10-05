@@ -26,7 +26,7 @@ class VerticalScrollBar {
 
     addEventListener(eventName, fn) {
         fn.callback = () => {
-            fn.call(this, this.el.scrollTop);
+            fn.call(this, this.top, this.height);
         };
 
         this.el.addEventListener(eventName, fn.callback);

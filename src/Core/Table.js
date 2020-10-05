@@ -96,12 +96,12 @@ class Table {
         this.render();
     }
 
-    onVerticalScroll = (top) => {
-        console.log(top);
+    onVerticalScroll = (top, height) => {
+        console.log(top, height);
     };
 
-    HorizontalScroll = (left) => {
-        console.log(left);
+    HorizontalScroll = (left, width) => {
+        console.log(left, width);
     };
 
     render() {
@@ -111,6 +111,7 @@ class Table {
         this.canvas.resize(width, height);
 
         this.renderHeader();
+        this.renderLineNo();
         this.renderData();
         this.renderGrid();
     }
@@ -130,8 +131,14 @@ class Table {
     renderHeader() {
         const header = this.dataSet.getHeader();
         const { defaultRowHeight, defaultColumnWidth } = Config.Table;
+        const lineNoWidth = this.getLineNoWidth();
 
-        let offsetX = 0;
+        // Render Line-No Header
+        this.canvas.attr({ fillStyle: "#f4f5f8" });
+        this.canvas.fillRect(0, 0, lineNoWidth, defaultRowHeight);
+
+        let offsetX = lineNoWidth;
+
         for (let i = 0; i < header.length; i++) {
             const field = header[i];
             const title = field.title || '';
@@ -173,16 +180,53 @@ class Table {
         }
     }
 
+    renderLineNo() {
+        const data = this.dataSet.getData();
+        const { defaultRowHeight } = Config.Table;
+
+        for (let i = 0, offsetY = defaultRowHeight; i < data.length; i++) {
+            const width = this.getLineNoWidth();
+            const height = data[i].height || defaultRowHeight;
+
+            const rect = {
+                x: 0,
+                y: offsetY,
+                width: width,
+                height: height
+            };
+
+            this.canvas.attr({ fillStyle: "#f4f5f8" });
+            this.canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+            const params = {
+                x: Math.trunc(rect.x + rect.width / 2),
+                y: Math.trunc(rect.y + rect.height / 2),
+                textAlign: 'center',
+                textBaseline: 'middle',
+                fontSize: 13
+            };
+
+            this.canvas.attr({ fillStyle: "#000000" });
+            this.canvas.fillText({
+                text: i + 1,
+                ...params
+            }, rect);
+
+            offsetY += height;
+        }
+    }
+
     renderData() {
         const header = this.dataSet.getHeader();
         const data = this.dataSet.getData();
+        const lineNoWidth = this.getLineNoWidth();
         const { defaultRowHeight, defaultColumnWidth } = Config.Table;
 
         for (let i = 0, offsetY = defaultRowHeight; i < data.length; i++) {
             const height = data[i].height || defaultRowHeight;
             const cells = data[i].cells || [];
 
-            for (let j = 0, offsetX = 0; j < cells.length; j++) {
+            for (let j = 0, offsetX = lineNoWidth; j < cells.length; j++) {
                 const field = header[j];
                 const cellWidth = field.width || defaultColumnWidth;
                 const cellHeight = height;
@@ -257,9 +301,17 @@ class Table {
             }
         }
 
+        // Render Header Grid
         this.canvas.save();
         this.canvas.setLineStyle();
         this.canvas.line([0, defaultRowHeight], [rowEndpoint, defaultRowHeight])
+        this.canvas.restore();
+
+        // Render LineNo Grid
+        const lineNoWidth = this.getLineNoWidth();
+        this.canvas.save();
+        this.canvas.setLineStyle();
+        this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint]);
         this.canvas.restore();
 
         for (let i = 0, s = defaultRowHeight; i < data.length; i++) {
@@ -273,7 +325,7 @@ class Table {
             this.canvas.restore();
         }
 
-        for (let i = 0, s = 0; i < header.length; i++) {
+        for (let i = 0, s = lineNoWidth; i < header.length; i++) {
             let column = header[i];
             const columnWidth = column.width ? column.width : defaultColumnWidth;
             s += columnWidth;
@@ -285,8 +337,13 @@ class Table {
         }
     }
 
-    drawContent() {
-
+    getLineNoWidth() {
+        return this.canvas.measureText({
+            text: this.dataSet.getData().length,
+            textAlign: 'start',
+            textBaseline: 'middle',
+            fontSize: 13
+        }).width + 8;
     }
 }
 
