@@ -130,6 +130,7 @@ class Table {
 
     renderHeader() {
         const header = this.dataSet.getHeader();
+        const [, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
         const { defaultRowHeight, defaultColumnWidth, headerColor } = Config.Table;
         const lineNoWidth = this.getLineNoWidth();
 
@@ -139,7 +140,7 @@ class Table {
 
         let offsetX = lineNoWidth;
 
-        for (let i = 0; i < header.length; i++) {
+        for (let i = firstColumnIndex; i < header.length; i++) {
             const field = header[i];
             const title = field.title || '';
             const align = ["left", "center", "right"].includes(field.align) ? field.align : 'center';
@@ -182,9 +183,10 @@ class Table {
 
     renderLineNo() {
         const data = this.dataSet.getData();
+        const [firstRowIndex] = this.dataSet.getFirstCellPositionOnViewport();
         const { defaultRowHeight, headerColor } = Config.Table;
 
-        for (let i = 0, offsetY = defaultRowHeight; i < data.length; i++) {
+        for (let i = firstRowIndex, offsetY = defaultRowHeight; i < data.length; i++) {
             const width = this.getLineNoWidth();
             const height = data[i].height || defaultRowHeight;
 
@@ -219,14 +221,15 @@ class Table {
     renderData() {
         const header = this.dataSet.getHeader();
         const data = this.dataSet.getData();
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
         const lineNoWidth = this.getLineNoWidth();
         const { defaultRowHeight, defaultColumnWidth } = Config.Table;
 
-        for (let i = 0, offsetY = defaultRowHeight; i < data.length; i++) {
+        for (let i = firstRowIndex, offsetY = defaultRowHeight; i < data.length; i++) {
             const height = data[i].height || defaultRowHeight;
             const cells = data[i].cells || [];
 
-            for (let j = 0, offsetX = lineNoWidth; j < cells.length; j++) {
+            for (let j = firstColumnIndex, offsetX = lineNoWidth; j < cells.length; j++) {
                 const field = header[j];
                 const cellWidth = field.width || defaultColumnWidth;
                 const cellHeight = height;
@@ -274,12 +277,13 @@ class Table {
         const maxHeight = this.canvas.size.height;
         const header = this.dataSet.getHeader();
         const data = this.dataSet.getData();
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
         const { defaultRowHeight, defaultColumnWidth, borderColor } = Config.Table;
 
         let rowEndpoint = 0;
         let columnEndpoint = 0;
 
-        for (let i = 0; i < header.length; i++) {
+        for (let i = firstColumnIndex; i < header.length; i++) {
             const field = header[i];
             const fieldWidth = field.width ? field.width : defaultColumnWidth;
 
@@ -291,7 +295,7 @@ class Table {
             }
         }
 
-        for (let i = 0; i < data.length; i++) {
+        for (let i = firstRowIndex; i < data.length; i++) {
             const row = data[i];
             columnEndpoint += row.height ? row.height : defaultRowHeight;
 
@@ -301,38 +305,39 @@ class Table {
             }
         }
 
+        const lineNoWidth = this.getLineNoWidth();
+
         // Render Header Grid
         this.canvas.save();
         this.canvas.setLineStyle();
-        this.canvas.line([0, defaultRowHeight], [rowEndpoint, defaultRowHeight])
+        this.canvas.line([0, defaultRowHeight], [rowEndpoint + lineNoWidth, defaultRowHeight])
         this.canvas.restore();
 
         // Render LineNo Grid
-        const lineNoWidth = this.getLineNoWidth();
         this.canvas.save();
         this.canvas.setLineStyle();
         this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint]);
         this.canvas.restore();
 
-        for (let i = 0, s = defaultRowHeight; i < data.length; i++) {
+        for (let i = firstRowIndex, s = defaultRowHeight; i < data.length; i++) {
             const row = data[i];
             const rowHeight = row.height ? row.height : defaultRowHeight;
             s += rowHeight;
 
             this.canvas.save();
             this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
-            this.canvas.line([0, s], [rowEndpoint, s])
+            this.canvas.line([0, s], [rowEndpoint + lineNoWidth, s])
             this.canvas.restore();
         }
 
-        for (let i = 0, s = lineNoWidth; i < header.length; i++) {
+        for (let i = firstColumnIndex, s = lineNoWidth; i < header.length; i++) {
             let column = header[i];
             const columnWidth = column.width ? column.width : defaultColumnWidth;
             s += columnWidth;
 
             this.canvas.save();
             this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
-            this.canvas.line([s, 0], [s, columnEndpoint])
+            this.canvas.line([s, 0], [s, columnEndpoint + defaultRowHeight])
             this.canvas.restore();
         }
     }

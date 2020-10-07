@@ -29,6 +29,13 @@ class DataSet {
      */
     height = 0;
 
+    /**
+     * First cell position on viewport
+     *
+     * @type {number[]}
+     */
+    firstCellPositionOnViewport = [0, 0];
+
     constructor(options = {}) {
         this.setHeader(options.header || []);
         this.setData(options.data || []);
@@ -69,6 +76,14 @@ class DataSet {
 
     getHeight() {
         return this.height;
+    }
+
+    getFirstCellPositionOnViewport() {
+        return this.firstCellPositionOnViewport;
+    }
+
+    setFirstCellPositionOnViewport(rowIndex, columnIndex) {
+        this.firstCellPositionOnViewport = [rowIndex, columnIndex];
     }
 }
 

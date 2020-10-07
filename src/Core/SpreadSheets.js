@@ -50,10 +50,15 @@ class SpreadSheets {
         }
 
         this.table = new Table(el, {});
-        this.table.setDataSet(new DataSet({
+
+        const dataSet = new DataSet({
             header: this.options.header,
             data: this.data
-        }));
+        });
+
+        dataSet.setFirstCellPositionOnViewport(5, 3);
+
+        this.table.setDataSet(dataSet);
         this.table.render();
         // this.vScrollBar = new VerticalScrollBar(this.container);
 
