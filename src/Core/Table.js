@@ -107,26 +107,44 @@ class Table {
 
     onMouseWheel = (_, deltaY) => {
         let [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
-        const dataCount = this.dataSet.getData().length;
+        let [firstRowIndexBeforeChange, firstColumnIndexBeforeChange] = [firstRowIndex, firstColumnIndex];
+        const data = this.dataSet.getData();
+        const dataCount = data.length;
+        const { defaultRowHeight, blankHeight } = Config.Table;
 
         if (deltaY > 0) {
-            firstRowIndex += 3;
+            let totalHeight = 0;
+            let totalLine = 0;
+            for (let i = firstRowIndex; i < dataCount; i++) {
+                const rowHeight = data[i].height || defaultRowHeight;
+                totalHeight += rowHeight;
 
-            if (firstRowIndex >= dataCount) {
-                firstRowIndex = dataCount - 1;
+                if (totalHeight > this.canvas.size.height) {
+                    break;
+                }
+
+                totalLine += 1;
+            }
+
+            if (totalHeight + blankHeight > this.canvas.size.height) {
+                firstRowIndex += totalLine < 3 ? totalLine : 3;
+                this.vScroll.top = data.slice(0, firstRowIndex).reduce((total, current) => {
+                    return total + (current.height || defaultRowHeight);
+                }, 0);
             }
         }
 
         if (deltaY < 0) {
-            firstRowIndex -= 3;
-
-            if (firstRowIndex < 0) {
-                firstRowIndex = 0;
-            }
+            firstRowIndex = firstRowIndex - 3 < 0 ? 0 : firstRowIndex - 3;
+            this.vScroll.top = data.slice(0, firstRowIndex).reduce((total, current) => {
+                return total + (current.height || defaultRowHeight);
+            }, 0);
         }
 
-        this.dataSet.setFirstCellPositionOnViewport(firstRowIndex, firstColumnIndex);
-        this.render();
+        if (firstRowIndexBeforeChange !== firstRowIndex || firstColumnIndexBeforeChange !== firstColumnIndex) {
+            this.dataSet.setFirstCellPositionOnViewport(firstRowIndex, firstColumnIndex);
+            this.render();
+        }
     };
 
     render() {

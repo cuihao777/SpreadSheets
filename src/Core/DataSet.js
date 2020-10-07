@@ -57,9 +57,10 @@ class DataSet {
         this.data = data;
 
         const { defaultColumnWidth, defaultRowHeight } = Config.Table;
+        const { blankWidth, blankHeight } = Config.Table;
 
-        this.width = 100;
-        this.height = 100;
+        this.width = blankWidth;
+        this.height = blankHeight;
 
         for (let i = 0; i < this.header.length; i++) {
             this.width += (this.header[i].width || defaultColumnWidth);
