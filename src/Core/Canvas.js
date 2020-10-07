@@ -195,6 +195,8 @@ class Canvas {
             if (eventName === "mousewheel" && event.deltaY !== 0) {
                 event.preventDefault();
                 fn.call(this, null, event.deltaY);
+            } else if (["mousedown", "mouseup"].includes(eventName)) {
+                fn.call(this, event.offsetX, event.offsetY);
             } else {
                 fn.call(this, event);
             }

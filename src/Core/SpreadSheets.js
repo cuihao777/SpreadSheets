@@ -1,12 +1,8 @@
 import Table from "./Table";
 import DataSet from "./DataSet";
-// import Canvas from './Canvas';
-// import VerticalScrollBar from './VerticalScrollBar';
 import { watcher } from '@/Clipboard/Watcher';
 
 class SpreadSheets {
-    sheets = [];
-
     constructor(el, options = {}) {
         this.defaultOptions = {
             defaultColumnWidth: 100,
@@ -32,7 +28,7 @@ class SpreadSheets {
         this.data = [];
 
         for (let i = 1; i <= 100000; i++) {
-            const row = { height: 100, cells: [] };
+            const row = { height: 24, cells: [] };
             for (let j = 1; j <= 10; j++) {
                 row.cells.push(`${i}-${j}`);
             }

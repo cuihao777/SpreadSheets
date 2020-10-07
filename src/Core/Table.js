@@ -92,10 +92,72 @@ class Table {
         });
         this.el.appendChild(this.canvas.el);
         this.canvas.addEventListener("mousewheel", this.onMouseWheel);
+        this.canvas.addEventListener("mousedown", this.onMouseDown);
+        this.canvas.addEventListener("mouseup", this.onMouseUp);
     }
 
     onParentNodeResize() {
         this.render();
+    }
+
+    onMouseDown = (x, y) => {
+        const index = this.getIndex(x, y);
+
+        if (index !== null) {
+            const [xIndex, yIndex] = index;
+            const data = this.dataSet.getData();
+            console.log(`mouse down: ${x},${y} | %c[${data[xIndex].cells[yIndex]}]`, 'color: blue; font-weight: bold;');
+        }
+    };
+
+    onMouseUp = (x, y) => {
+        const index = this.getIndex(x, y);
+
+        if (index !== null) {
+            const [xIndex, yIndex] = index;
+            const data = this.dataSet.getData();
+            console.log(`mouse up: ${x},${y} | %c[${data[xIndex].cells[yIndex]}]`, 'color: blue; font-weight: bold;');
+        }
+    };
+
+    getIndex(x, y) {
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+        const { defaultRowHeight: headerHeight, blankWidth, blankHeight } = Config.Table;
+        const lineNoWidth = this.getLineNoWidth();
+        const widthCache = this.dataSet.cache.width;
+        const heightCache = this.dataSet.cache.height;
+        const lastColumnIndex = this.dataSet.cache.width.length - 1;
+        const lastRowIndex = this.dataSet.cache.height.length - 1;
+        let targetX = widthCache[firstColumnIndex] + x - lineNoWidth;
+        let targetY = heightCache[firstRowIndex] + y - headerHeight;
+
+        let xIndex = firstColumnIndex;
+        let yIndex = firstRowIndex;
+
+        let selectedIndex = {
+            row: -2,
+            column: -2
+        };
+
+        if (targetX <= this.dataSet.width - blankWidth) {
+            while (xIndex <= lastColumnIndex && widthCache[xIndex] < targetX) {
+                xIndex++;
+            }
+            selectedIndex.column = xIndex - 1;
+        }
+
+        if (targetY <= this.dataSet.height - blankHeight) {
+            while (yIndex <= lastRowIndex && heightCache[yIndex] < targetY) {
+                yIndex++;
+            }
+            selectedIndex.row = yIndex - 1;
+        }
+
+        if (selectedIndex.row === -2 || selectedIndex.column === -2) {
+            return null;
+        } else {
+            return [selectedIndex.row, selectedIndex.column];
+        }
     }
 
     onVerticalScroll = (top) => {
