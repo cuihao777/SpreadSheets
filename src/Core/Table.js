@@ -399,20 +399,14 @@ class Table {
 
         const lineNoWidth = this.getLineNoWidth();
 
-        // Render Header Grid
-        this.canvas.save();
-        this.canvas.setLineStyle();
-        this.canvas.line([0, defaultRowHeight], [rowEndpoint + lineNoWidth, defaultRowHeight])
-        this.canvas.restore();
-
-        // Render LineNo Grid
-        this.canvas.save();
-        this.canvas.setLineStyle();
-        this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint + defaultRowHeight]);
-        this.canvas.restore();
-
         this.canvas.save();
         this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
+
+        // Render Header Grid
+        this.canvas.line([0, defaultRowHeight], [rowEndpoint + lineNoWidth, defaultRowHeight])
+
+        // Render LineNo Grid
+        this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint + defaultRowHeight]);
 
         for (let i = firstRowIndex, s = defaultRowHeight; i < data.length; i++) {
             const row = data[i];
@@ -431,13 +425,21 @@ class Table {
     }
 
     getLineNoWidth() {
-        return this.canvas.measureText({
-            text: this.dataSet.getData().length,
-            textAlign: 'start',
-            textBaseline: 'middle',
-            fontSize: 13
-        }).width + 20;
+        const text = this.dataSet.getData().length;
+
+        if (lineNoWidthCache[text] === undefined) {
+            lineNoWidthCache[text] = this.canvas.measureText({
+                text: this.dataSet.getData().length,
+                textAlign: 'start',
+                textBaseline: 'middle',
+                fontSize: 13
+            }).width + 16;
+        }
+
+        return lineNoWidthCache[text];
     }
 }
+
+const lineNoWidthCache = {};
 
 export default Table;

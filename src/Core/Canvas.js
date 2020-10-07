@@ -180,17 +180,14 @@ class Canvas {
                     textAlign = 'start',
                     textBaseline = 'top'
                 }) {
-        this.context.font = `${fontStyle} ${fontVariant} ${fontWeight} ${npx(fontSize)}px Arial`;
+        this.context.save();
+        this.context.beginPath();
+        this.context.font = `${fontStyle} ${fontVariant} ${fontWeight} ${fontSize}px Arial`;
         this.context.textBaseline = textBaseline;
         this.context.textAlign = textAlign;
-        return this.context.measureText(text);
-    }
-
-    setLineStyle() {
-        this.attr({
-            strokeStyle: '#d4d4d4',
-            lineWidth: 1
-        });
+        const measureText = this.context.measureText(text);
+        this.context.restore();
+        return measureText;
     }
 
     addEventListener(eventName, fn) {
