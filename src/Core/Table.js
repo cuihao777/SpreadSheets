@@ -120,8 +120,26 @@ class Table {
         }
     };
 
-    onHorizontalScroll = (left, width) => {
-        console.log(left, width);
+    onHorizontalScroll = (left) => {
+        const widthCache = this.dataSet.cache.width;
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+
+        let i = 0;
+        while (i < widthCache.length) {
+            const currentWidth = widthCache[i];
+            const nextWidth = widthCache[i + 1];
+
+            if (left >= currentWidth && left < nextWidth) {
+                break;
+            }
+
+            i++;
+        }
+
+        if (i !== firstColumnIndex) {
+            this.dataSet.setFirstCellPositionOnViewport(firstRowIndex, i);
+            this.render();
+        }
     };
 
     onMouseWheel = (_, deltaY) => {
