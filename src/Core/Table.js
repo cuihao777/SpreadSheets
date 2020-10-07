@@ -411,27 +411,23 @@ class Table {
         this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint + defaultRowHeight]);
         this.canvas.restore();
 
+        this.canvas.save();
+        this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
+
         for (let i = firstRowIndex, s = defaultRowHeight; i < data.length; i++) {
             const row = data[i];
             const rowHeight = row.height ? row.height : defaultRowHeight;
             s += rowHeight;
-
-            this.canvas.save();
-            this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
             this.canvas.line([0, s], [rowEndpoint + lineNoWidth, s])
-            this.canvas.restore();
         }
 
         for (let i = firstColumnIndex, s = lineNoWidth; i < header.length; i++) {
             let column = header[i];
             const columnWidth = column.width ? column.width : defaultColumnWidth;
             s += columnWidth;
-
-            this.canvas.save();
-            this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
             this.canvas.line([s, 0], [s, columnEndpoint + defaultRowHeight])
-            this.canvas.restore();
         }
+        this.canvas.restore();
     }
 
     getLineNoWidth() {
@@ -440,7 +436,7 @@ class Table {
             textAlign: 'start',
             textBaseline: 'middle',
             fontSize: 13
-        }).width + 8;
+        }).width + 20;
     }
 }
 
