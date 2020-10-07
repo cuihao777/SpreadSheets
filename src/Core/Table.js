@@ -98,8 +98,26 @@ class Table {
         this.render();
     }
 
-    onVerticalScroll = (top, height) => {
-        console.log(top, height);
+    onVerticalScroll = (top) => {
+        const heightCache = this.dataSet.cache.height;
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+
+        let i = 0;
+        while (i < heightCache.length) {
+            const currentHeight = heightCache[i];
+            const nextHeight = heightCache[i + 1];
+
+            if (top >= currentHeight && top < nextHeight) {
+                break;
+            }
+
+            i++;
+        }
+
+        if (i !== firstRowIndex) {
+            this.dataSet.setFirstCellPositionOnViewport(i, firstColumnIndex);
+            this.render();
+        }
     };
 
     onHorizontalScroll = (left, width) => {
