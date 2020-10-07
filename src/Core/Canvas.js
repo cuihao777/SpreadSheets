@@ -82,6 +82,13 @@ class Canvas {
         return this;
     }
 
+    clipRect({ x, y, width, height }) {
+        this.context.save();
+        this.context.beginPath();
+        this.context.rect(npx(x), npx(y), npx(width), npx(height));
+        this.context.clip();
+    }
+
     beginPath() {
         this.context.beginPath();
         return this;
@@ -151,9 +158,7 @@ class Canvas {
                  textBaseline = 'top'
              }, rect) {
         if (rect) {
-            this.context.save();
-            this.context.rect(npx(rect.x), npx(rect.y), npx(rect.width), npx(rect.height));
-            this.context.clip();
+            this.clipRect({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
         }
 
         this.context.font = `${fontStyle} ${fontVariant} ${fontWeight} ${npx(fontSize)}px Arial`;
@@ -162,7 +167,7 @@ class Canvas {
         this.context.fillText(text, npx(x), npx(y));
 
         if (rect) {
-            this.context.restore();
+            this.restore();
         }
     }
 
