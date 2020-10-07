@@ -36,6 +36,16 @@ class DataSet {
      */
     firstCellPositionOnViewport = [0, 0];
 
+    /**
+     * Cache of Width & Height
+     *
+     * @type {{width: number[], height: number[]}}
+     */
+    cache = {
+        width: [],
+        height: [],
+    };
+
     constructor(options = {}) {
         this.setHeader(options.header || []);
         this.setData(options.data || []);
@@ -59,16 +69,23 @@ class DataSet {
         const { defaultColumnWidth, defaultRowHeight } = Config.Table;
         const { blankWidth, blankHeight } = Config.Table;
 
-        this.width = blankWidth;
-        this.height = blankHeight;
+        this.width = 0;
+        this.height = 0;
+        this.cache.width = [];
+        this.cache.height = [];
 
         for (let i = 0; i < this.header.length; i++) {
+            this.cache.width[i] = this.width;
             this.width += (this.header[i].width || defaultColumnWidth);
         }
 
         for (let i = 0; i < this.data.length; i++) {
+            this.cache.height[i] = this.height;
             this.height += (this.data[i].height || defaultRowHeight);
         }
+
+        this.width += blankWidth;
+        this.height += blankHeight;
     }
 
     getWidth() {

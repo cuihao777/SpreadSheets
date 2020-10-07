@@ -25,8 +25,16 @@ class VerticalScrollBar {
     }
 
     addEventListener(eventName, fn) {
-        fn.callback = () => {
-            fn.call(this, this.top, this.height);
+        fn.callback = (event) => {
+            event.preventDefault();
+
+            if (eventName === "scroll") {
+                fn.call(this, this.top, this.height);
+            } else if (eventName === "mousewheel" && event.deltaY !== 0) {
+                fn.call(this, null, event.deltaY);
+            } else {
+                fn.call(this, event);
+            }
         };
 
         this.el.addEventListener(eventName, fn.callback);

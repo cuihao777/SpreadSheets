@@ -77,6 +77,7 @@ class Table {
         this.vScroll = new VerticalScrollBar();
         this.el.appendChild(this.vScroll.el);
         this.vScroll.addEventListener("scroll", this.onVerticalScroll);
+        this.vScroll.addEventListener("mousewheel", this.onMouseWheel);
 
         this.hScroll = new HorizontalScrollBar();
         this.el.appendChild(this.hScroll.el);
@@ -128,17 +129,13 @@ class Table {
 
             if (totalHeight + blankHeight > this.canvas.size.height) {
                 firstRowIndex += totalLine < 3 ? totalLine : 3;
-                this.vScroll.top = data.slice(0, firstRowIndex).reduce((total, current) => {
-                    return total + (current.height || defaultRowHeight);
-                }, 0);
+                this.vScroll.top = this.dataSet.cache.height[firstRowIndex];
             }
         }
 
         if (deltaY < 0) {
             firstRowIndex = firstRowIndex - 3 < 0 ? 0 : firstRowIndex - 3;
-            this.vScroll.top = data.slice(0, firstRowIndex).reduce((total, current) => {
-                return total + (current.height || defaultRowHeight);
-            }, 0);
+            this.vScroll.top = this.dataSet.cache.height[firstRowIndex];
         }
 
         if (firstRowIndexBeforeChange !== firstRowIndex || firstColumnIndexBeforeChange !== firstColumnIndex) {
@@ -375,7 +372,7 @@ class Table {
         // Render LineNo Grid
         this.canvas.save();
         this.canvas.setLineStyle();
-        this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint]);
+        this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint + defaultRowHeight]);
         this.canvas.restore();
 
         for (let i = firstRowIndex, s = defaultRowHeight; i < data.length; i++) {

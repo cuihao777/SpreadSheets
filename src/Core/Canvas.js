@@ -195,7 +195,12 @@ class Canvas {
 
     addEventListener(eventName, fn) {
         fn.callback = (event) => {
-            fn.call(this, event.deltaX, event.deltaY);
+            if (eventName === "mousewheel" && event.deltaY !== 0) {
+                event.preventDefault();
+                fn.call(this, null, event.deltaY);
+            } else {
+                fn.call(this, event);
+            }
         };
 
         this.el.addEventListener(eventName, fn.callback);
