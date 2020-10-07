@@ -80,7 +80,7 @@ class Table {
 
         this.hScroll = new HorizontalScrollBar();
         this.el.appendChild(this.hScroll.el);
-        this.hScroll.addEventListener("scroll", this.HorizontalScroll);
+        this.hScroll.addEventListener("scroll", this.onHorizontalScroll);
 
         this.vScroll.el.style.bottom = `${this.hScroll.el.offsetHeight}px`;
         this.hScroll.el.style.right = `${this.vScroll.el.offsetWidth}px`;
@@ -89,7 +89,8 @@ class Table {
             width: this.el.clientWidth - this.vScroll.el.offsetWidth,
             height: this.el.clientHeight - this.hScroll.el.offsetHeight
         });
-        this.el.appendChild(this.canvas.canvas);
+        this.el.appendChild(this.canvas.el);
+        this.canvas.addEventListener("mousewheel", this.onMouseWheel);
     }
 
     onParentNodeResize() {
@@ -100,8 +101,32 @@ class Table {
         console.log(top, height);
     };
 
-    HorizontalScroll = (left, width) => {
+    onHorizontalScroll = (left, width) => {
         console.log(left, width);
+    };
+
+    onMouseWheel = (_, deltaY) => {
+        let [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+        const dataCount = this.dataSet.getData().length;
+
+        if (deltaY > 0) {
+            firstRowIndex += 3;
+
+            if (firstRowIndex >= dataCount) {
+                firstRowIndex = dataCount - 1;
+            }
+        }
+
+        if (deltaY < 0) {
+            firstRowIndex -= 3;
+
+            if (firstRowIndex < 0) {
+                firstRowIndex = 0;
+            }
+        }
+
+        this.dataSet.setFirstCellPositionOnViewport(firstRowIndex, firstColumnIndex);
+        this.render();
     };
 
     render() {

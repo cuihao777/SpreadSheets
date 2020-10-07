@@ -19,7 +19,7 @@ class Canvas {
      *
      * @type {HTMLCanvasElement}
      */
-    canvas = null;
+    el = null;
 
     /**
      * Context for Canvas
@@ -46,8 +46,8 @@ class Canvas {
 
         this.options = { ...defaultOptions, ...options };
 
-        this.canvas = document.createElement('canvas');
-        this.context = this.canvas.getContext('2d');
+        this.el = document.createElement('canvas');
+        this.context = this.el.getContext('2d');
         this.resize(this.options.width, this.options.height);
         this.context.scale(dpr(), dpr());
     }
@@ -55,14 +55,14 @@ class Canvas {
     resize(width, height) {
         this.size.width = width;
         this.size.height = height;
-        this.canvas.style.width = `${width}px`;
-        this.canvas.style.height = `${height}px`;
-        this.canvas.width = npx(width);
-        this.canvas.height = npx(height);
+        this.el.style.width = `${width}px`;
+        this.el.style.height = `${height}px`;
+        this.el.width = npx(width);
+        this.el.height = npx(height);
     }
 
     clear() {
-        const { width, height } = this.canvas;
+        const { width, height } = this.el;
         this.context.clearRect(0, 0, width, height);
         return this;
     }
@@ -191,6 +191,19 @@ class Canvas {
             strokeStyle: '#d4d4d4',
             lineWidth: 1
         });
+    }
+
+    addEventListener(eventName, fn) {
+        fn.callback = (event) => {
+            fn.call(this, event.deltaX, event.deltaY);
+        };
+
+        this.el.addEventListener(eventName, fn.callback);
+    }
+
+    removeEventListener(eventName, fn) {
+        fn = fn.callback || fn;
+        this.el.removeEventListener(eventName, fn);
     }
 }
 
