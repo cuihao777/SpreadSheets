@@ -24,7 +24,8 @@ class SpreadSheets {
             { title: "E", width: 100 },
             { title: "F", width: 100 },
             { title: "G", width: 100 },
-            { title: "F", width: 100 }
+            { title: "H", width: 100 },
+            { title: "I", width: 100 }
         ];
 
         this.data = [
@@ -56,7 +57,7 @@ class SpreadSheets {
             data: this.data
         });
 
-        dataSet.setFirstCellPositionOnViewport(5, 3);
+        dataSet.setFirstCellPositionOnViewport(0, 0);
 
         this.table.setDataSet(dataSet);
         this.table.render();

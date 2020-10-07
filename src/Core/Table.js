@@ -178,6 +178,10 @@ class Table {
             }, rect);
 
             offsetX += rect.width;
+
+            if (offsetX > this.canvas.size.width) {
+                break;
+            }
         }
     }
 
@@ -215,6 +219,10 @@ class Table {
             }, rect);
 
             offsetY += height;
+
+            if (offsetY > this.canvas.size.height) {
+                break;
+            }
         }
     }
 
@@ -266,9 +274,17 @@ class Table {
                 }, rect);
 
                 offsetX += rect.width;
+
+                if (offsetX > this.canvas.size.width) {
+                    break;
+                }
             }
 
             offsetY += height;
+
+            if (offsetY > this.canvas.size.height) {
+                break;
+            }
         }
     }
 
