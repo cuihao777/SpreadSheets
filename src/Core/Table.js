@@ -1,9 +1,10 @@
 import ResizeObserver from 'resize-observer-polyfill';
 import throttle from 'lodash/throttle';
 import Canvas from './Canvas';
-import VerticalScrollBar from './VerticalScrollBar'
-import HorizontalScrollBar from './HorizontalScrollBar'
-import { Config } from '@/Config'
+import VerticalScrollBar from './VerticalScrollBar';
+import HorizontalScrollBar from './HorizontalScrollBar';
+import { CellRange } from './DataSet';
+import { Config } from '@/Config';
 
 function createTable(width = -1, height = -1) {
     const el = document.createElement("div");
@@ -107,9 +108,8 @@ class Table {
         const index = this.getIndex(x, y);
 
         if (index !== null) {
-            const [xIndex, yIndex] = index;
-            const data = this.dataSet.getData();
-            console.log(`mouse down: ${x},${y} | %c[${data[xIndex].cells[yIndex]}]`, 'color: blue; font-weight: bold;');
+            this.dataSet.setSelected(new CellRange(index, index));
+            this.render();
         }
     };
 
@@ -122,14 +122,23 @@ class Table {
         const index = this.getIndex(x, y);
 
         if (index !== null) {
-            const [xIndex, yIndex] = index;
-            const data = this.dataSet.getData();
-            console.log(`mouse up: ${x},${y} | %c[${data[xIndex].cells[yIndex]}]`, 'color: blue; font-weight: bold;');
+            this.dataSet.setSelected({ to: index });
+            this.render();
         }
     };
 
     onMouseMove = (x, y, status) => {
-        console.log(x, y, status);
+        if (status.isOutOfBound) {
+            console.log("out of bound.");
+            return;
+        }
+
+        const index = this.getIndex(x, y);
+
+        if (index !== null) {
+            this.dataSet.setSelected({ to: index });
+            this.render();
+        }
     };
 
     getIndex(x, y) {
@@ -264,6 +273,7 @@ class Table {
         this.renderLineNo();
         this.renderData();
         this.renderGrid();
+        this.renderSelectedRange();
     }
 
     /**
@@ -498,6 +508,59 @@ class Table {
         this.canvas.restore();
     }
 
+    renderSelectedRange() {
+        const selectedRange = this.dataSet.getSelected().normalize();
+        const headerHeight = Config.Table.defaultRowHeight;
+        const { defaultRowHeight, defaultColumnWidth } = Config.Table;
+        const lineNoWidth = this.getLineNoWidth();
+        const clipHeight = this.canvas.size.height - headerHeight;
+        const clipWidth = this.canvas.size.width - lineNoWidth;
+
+        this.canvas.clipRect(lineNoWidth, headerHeight, clipWidth, clipHeight);
+
+        const [fRow, fColumn] = selectedRange.from;
+        const [tRow, tColumn] = selectedRange.to;
+
+        const from = {
+            x: this.dataSet.cache.width[fColumn],
+            y: this.dataSet.cache.height[fRow]
+        };
+
+        const to = {
+            x: this.dataSet.cache.width[tColumn],
+            y: this.dataSet.cache.height[tRow],
+            width: this.dataSet.getHeader()[tColumn].width || defaultColumnWidth,
+            height: this.dataSet.getData()[tRow].height || defaultRowHeight
+        };
+
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+        const firstCellX = this.dataSet.cache.width[firstColumnIndex];
+        const firstCellY = this.dataSet.cache.height[firstRowIndex];
+
+        const rect = {
+            x: from.x - firstCellX + lineNoWidth,
+            y: from.y - firstCellY + headerHeight,
+            width: to.x - from.x + to.width,
+            height: to.y - from.y + to.height
+        };
+
+        this.canvas.attr({
+            fillStyle: "rgb(75,137,255,0.1)"
+        });
+        this.canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+        this.canvas.border("medium", "#4b89ff");
+        const lines = [
+            [rect.x, rect.y],
+            [rect.x + rect.width, rect.y],
+            [rect.x + rect.width, rect.y + rect.height],
+            [rect.x, rect.y + rect.height],
+            [rect.x, rect.y]
+        ];
+        this.canvas.line(...lines);
+        this.canvas.restore();
+    }
+
     getLineNoWidth() {
         const text = this.dataSet.getData().length;
 
@@ -511,6 +574,11 @@ class Table {
         }
 
         return lineNoWidthCache[text];
+    }
+
+    isOutOfBound(x, y) {
+        const { width, height } = this.canvas.size;
+        return x < 0 || y < 0 || x >= width || y >= height;
     }
 }
 

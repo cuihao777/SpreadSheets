@@ -37,6 +37,13 @@ class DataSet {
     firstCellPositionOnViewport = [0, 0];
 
     /**
+     * Selected Index Range
+     *
+     * @type {SelectedRange}
+     */
+    selected = null;
+
+    /**
      * Cache of Width & Height
      *
      * @type {{width: number[], height: number[]}}
@@ -86,6 +93,8 @@ class DataSet {
 
         this.width += blankWidth;
         this.height += blankHeight;
+
+        this.selected = new CellRange(0, 0);
     }
 
     getWidth() {
@@ -103,7 +112,88 @@ class DataSet {
     setFirstCellPositionOnViewport(rowIndex, columnIndex) {
         this.firstCellPositionOnViewport = [rowIndex, columnIndex];
     }
+
+    /**
+     * Get Selected Range
+     *
+     * @returns {SelectedRange}
+     */
+    getSelected() {
+        return this.selected;
+    }
+
+    /**
+     * Set Selected Range
+     *
+     * @param selected {SelectedRange | {from:any, to:any}}
+     */
+    setSelected(selected) {
+        if (selected instanceof SelectedRange) {
+            this.selected = selected;
+        } else {
+            if (selected.from !== undefined) {
+                this.selected.from = selected.from;
+            }
+            if (selected.to !== undefined) {
+                this.selected.to = selected.to;
+            }
+        }
+    }
 }
 
+export class SelectedRange {
+    from = null;
+    to = null;
+
+    normalize() {
+        return { from: null, to: null };
+    }
+}
+
+export class CellRange extends SelectedRange {
+    from = [-1, -1]
+    to = [-1, -1]
+
+    constructor(from = [-1, -1], to = [-1, -1]) {
+        super();
+
+        this.from = from;
+        this.to = to;
+    }
+
+    normalize() {
+        const [fx, fy] = this.from;
+        const [tx, ty] = this.to;
+
+        return {
+            from: [(fx < tx ? fx : tx), (fy < ty ? fy : ty)],
+            to: [(fx > tx ? fx : tx), (fy > ty ? fy : ty)]
+        };
+    }
+}
+
+export class ColumnRange extends SelectedRange {
+    from = -1
+    to = -1
+
+    constructor(from = -1, to = -1) {
+        super();
+
+        this.from = from;
+        this.to = to;
+    }
+}
+
+export class RowRange extends SelectedRange {
+    from = -1
+    to = -1
+
+    constructor(from = -1, to = -1) {
+        super();
+
+        this.from = from;
+        this.to = to;
+    }
+}
 
 export default DataSet;

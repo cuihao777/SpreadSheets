@@ -84,10 +84,10 @@ class Canvas {
         return this;
     }
 
-    clipRect({ x, y, width, height }) {
+    clipRect(x, y, w, h) {
         this.context.save();
         this.context.beginPath();
-        this.context.rect(npx(x), npx(y), npx(width), npx(height));
+        this.context.rect(npx(x), npx(y), npx(w), npx(h));
         this.context.clip();
     }
 
@@ -160,7 +160,7 @@ class Canvas {
                  textBaseline = 'top'
              }, rect) {
         if (rect) {
-            this.clipRect({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+            this.clipRect(rect.x, rect.y, rect.width, rect.height);
         }
 
         this.context.font = `${fontStyle} ${fontVariant} ${fontWeight} ${npx(fontSize)}px Arial`;
@@ -195,15 +195,11 @@ class Canvas {
     addEventListener(events) {
         const canvas = this.el;
         const emptyFn = () => undefined;
-        const isOutOfBound = (x, y) => x < 0 || y < 0 || x >= canvas.width || y >= canvas.height;
 
         let startX = null, startY = null;
         let baseX = null, baseY = null;
 
-        const status = {
-            isDragging: false,
-            isOutOfBound: false
-        };
+        const status = { isDragging: false };
 
         const onMouseWheel = (function () {
             const fn = events['mousewheel'] || emptyFn;
@@ -221,7 +217,6 @@ class Canvas {
             return (event) => {
                 if (event.target === canvas) {
                     status.isDragging = true;
-                    status.isOutOfBound = false;
                     startX = event.pageX;
                     startY = event.pageY;
                     baseX = event.offsetX;
@@ -239,7 +234,6 @@ class Canvas {
                     const targetX = event.pageX - startX + baseX;
                     const targetY = event.pageY - startY + baseY;
                     status.isDragging = false;
-                    status.isOutOfBound = isOutOfBound(targetX, targetY);
                     fn.call(this, targetX, targetY, status);
                 }
             };
@@ -260,16 +254,15 @@ class Canvas {
                 if (status.isDragging && isMoved) {
                     const targetX = event.pageX - startX + baseX;
                     const targetY = event.pageY - startY + baseY;
-                    status.isOutOfBound = isOutOfBound(targetX, targetY);
                     fn.call(this, targetX, targetY, status);
                 }
-            }, 200);
+            }, 110);
         })();
 
         document.addEventListener("mousedown", onMouseDown);
         document.addEventListener("mouseup", onMouseUp);
         document.addEventListener("mousemove", onMouseMove);
-        this.el.addEventListener("mousewheel", onMouseWheel);
+        canvas.addEventListener("mousewheel", onMouseWheel);
 
         return function remove() {
             document.removeEventListener("mousedown", onMouseDown);
