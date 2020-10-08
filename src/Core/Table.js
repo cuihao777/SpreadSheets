@@ -91,9 +91,12 @@ class Table {
             height: this.el.clientHeight - this.hScroll.el.offsetHeight
         });
         this.el.appendChild(this.canvas.el);
-        this.canvas.addEventListener("mousewheel", this.onMouseWheel);
-        this.canvas.addEventListener("mousedown", this.onMouseDown);
-        this.canvas.addEventListener("mouseup", this.onMouseUp);
+        this.canvas.addEventListener({
+            "mousewheel": this.onMouseWheel,
+            "mousedown": this.onMouseDown,
+            "mouseup": this.onMouseUp,
+            "mousemove": this.onMouseMove,
+        });
     }
 
     onParentNodeResize() {
@@ -110,7 +113,12 @@ class Table {
         }
     };
 
-    onMouseUp = (x, y) => {
+    onMouseUp = (x, y, status) => {
+        if (status.isOutOfBound) {
+            console.log("out of bound.");
+            return;
+        }
+
         const index = this.getIndex(x, y);
 
         if (index !== null) {
@@ -118,6 +126,10 @@ class Table {
             const data = this.dataSet.getData();
             console.log(`mouse up: ${x},${y} | %c[${data[xIndex].cells[yIndex]}]`, 'color: blue; font-weight: bold;');
         }
+    };
+
+    onMouseMove = (x, y, status) => {
+        console.log(x, y, status);
     };
 
     getIndex(x, y) {

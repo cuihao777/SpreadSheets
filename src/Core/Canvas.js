@@ -1,3 +1,5 @@
+import throttle from "lodash/throttle";
+
 let dpr = () => {
     let ratio = window.devicePixelRatio || 1;
     dpr = () => ratio;
@@ -190,24 +192,91 @@ class Canvas {
         return measureText;
     }
 
-    addEventListener(eventName, fn) {
-        fn.callback = (event) => {
-            if (eventName === "mousewheel" && event.deltaY !== 0) {
-                event.preventDefault();
-                fn.call(this, null, event.deltaY);
-            } else if (["mousedown", "mouseup"].includes(eventName)) {
-                fn.call(this, event.offsetX, event.offsetY);
-            } else {
-                fn.call(this, event);
-            }
+    addEventListener(events) {
+        const canvas = this.el;
+        const emptyFn = () => undefined;
+        const isOutOfBound = (x, y) => x < 0 || y < 0 || x >= canvas.width || y >= canvas.height;
+
+        let startX = null, startY = null;
+        let baseX = null, baseY = null;
+
+        const status = {
+            isDragging: false,
+            isOutOfBound: false
         };
 
-        this.el.addEventListener(eventName, fn.callback);
-    }
+        const onMouseWheel = (function () {
+            const fn = events['mousewheel'] || emptyFn;
+            return (event) => {
+                if (event.deltaY !== 0) {
+                    event.preventDefault();
+                    fn.call(this, null, event.deltaY);
+                }
+            };
+        })();
 
-    removeEventListener(eventName, fn) {
-        fn = fn.callback || fn;
-        this.el.removeEventListener(eventName, fn);
+        const onMouseDown = (function () {
+            const fn = events['mousedown'] || emptyFn;
+
+            return (event) => {
+                if (event.target === canvas) {
+                    status.isDragging = true;
+                    status.isOutOfBound = false;
+                    startX = event.pageX;
+                    startY = event.pageY;
+                    baseX = event.offsetX;
+                    baseY = event.offsetY;
+                    fn.call(this, baseX, baseY);
+                }
+            };
+        })();
+
+        const onMouseUp = (function () {
+            const fn = events['mouseup'] || emptyFn;
+
+            return (event) => {
+                if (status.isDragging) {
+                    const targetX = event.pageX - startX + baseX;
+                    const targetY = event.pageY - startY + baseY;
+                    status.isDragging = false;
+                    status.isOutOfBound = isOutOfBound(targetX, targetY);
+                    fn.call(this, targetX, targetY, status);
+                }
+            };
+        })();
+
+        const onMouseMove = (function () {
+            const fn = events['mousemove'] || emptyFn;
+            let lastPageX = null;
+            let lastPageY = null;
+
+            return throttle((event) => {
+                const currentPageX = event.pageX;
+                const currentPageY = event.pageY;
+                const isMoved = lastPageX !== currentPageX || lastPageY !== currentPageY;
+                lastPageX = currentPageX;
+                lastPageY = currentPageY;
+
+                if (status.isDragging && isMoved) {
+                    const targetX = event.pageX - startX + baseX;
+                    const targetY = event.pageY - startY + baseY;
+                    status.isOutOfBound = isOutOfBound(targetX, targetY);
+                    fn.call(this, targetX, targetY, status);
+                }
+            }, 200);
+        })();
+
+        document.addEventListener("mousedown", onMouseDown);
+        document.addEventListener("mouseup", onMouseUp);
+        document.addEventListener("mousemove", onMouseMove);
+        this.el.addEventListener("mousewheel", onMouseWheel);
+
+        return function remove() {
+            document.removeEventListener("mousedown", onMouseDown);
+            document.removeEventListener("mouseup", onMouseUp);
+            document.removeEventListener("mousemove", onMouseMove);
+            canvas.removeEventListener("mousewheel", onMouseWheel);
+        };
     }
 }
 
