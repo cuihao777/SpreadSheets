@@ -113,12 +113,7 @@ class Table {
         }
     };
 
-    onMouseUp = (x, y, status) => {
-        if (status.isOutOfBound) {
-            console.log("out of bound.");
-            return;
-        }
-
+    onMouseUp = (x, y) => {
         const index = this.getIndex(x, y);
 
         if (index !== null) {
@@ -127,17 +122,15 @@ class Table {
         }
     };
 
-    onMouseMove = (x, y, status) => {
-        if (status.isOutOfBound) {
-            console.log("out of bound.");
-            return;
-        }
-
+    onMouseMove = (x, y) => {
         const index = this.getIndex(x, y);
 
         if (index !== null) {
-            this.dataSet.setSelected({ to: index });
-            this.render();
+            const toIndex = this.dataSet.getSelected().to;
+            if (toIndex[0] !== index[0] || toIndex[1] !== index[1]) {
+                this.dataSet.setSelected({ to: index });
+                this.render();
+            }
         }
     };
 
@@ -268,7 +261,6 @@ class Table {
         const height = this.el.clientHeight - this.hScroll.el.offsetHeight + 1;
 
         this.canvas.resize(width, height);
-
         this.renderHeader();
         this.renderLineNo();
         this.renderData();
