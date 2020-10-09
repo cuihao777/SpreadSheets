@@ -94,7 +94,7 @@ class DataSet {
         this.width += blankWidth;
         this.height += blankHeight;
 
-        this.selected = new CellRange(0, 0);
+        this.setSelected(new CellRange(0, 0));
     }
 
     getWidth() {
@@ -129,6 +129,17 @@ class DataSet {
      */
     setSelected(selected) {
         if (selected instanceof SelectedRange) {
+            const lastRowIndex = this.data.length - 1;
+            const lastColumnIndex = this.header.length - 1;
+
+            if (selected instanceof ColumnRange) {
+                selected.setLastRowIndex(lastRowIndex);
+            } else if (selected instanceof RowRange) {
+                selected.setLastColumnIndex(lastColumnIndex);
+            } else if (selected instanceof FullRange) {
+                selected.setIndex(lastRowIndex, lastColumnIndex);
+            }
+
             this.selected = selected;
         } else {
             if (selected.from !== undefined) {
@@ -173,8 +184,9 @@ export class CellRange extends SelectedRange {
 }
 
 export class ColumnRange extends SelectedRange {
-    from = -1
-    to = -1
+    from = -1;
+    to = -1;
+    lastRowIndex = -1;
 
     constructor(from = -1, to = -1) {
         super();
@@ -182,17 +194,61 @@ export class ColumnRange extends SelectedRange {
         this.from = from;
         this.to = to;
     }
+
+    setLastRowIndex(lastRowIndex) {
+        this.lastRowIndex = lastRowIndex;
+    }
+
+    normalize() {
+        const { from, to } = this;
+
+        return {
+            from: [0, from < to ? from : to],
+            to: [this.lastRowIndex, from > to ? from : to]
+        };
+    }
 }
 
 export class RowRange extends SelectedRange {
-    from = -1
-    to = -1
+    from = -1;
+    to = -1;
+    lastColumnIndex = -1;
 
     constructor(from = -1, to = -1) {
         super();
 
         this.from = from;
         this.to = to;
+    }
+
+    setLastColumnIndex(lastColumnIndex) {
+        this.lastColumnIndex = lastColumnIndex;
+    }
+
+    normalize() {
+        const { from, to } = this;
+
+        return {
+            from: [from < to ? from : to, 0],
+            to: [from > to ? from : to, this.lastColumnIndex]
+        };
+    }
+}
+
+export class FullRange extends SelectedRange {
+    lastRowIndex = -1;
+    lastColumnIndex = -1;
+
+    setIndex(lastRowIndex, lastColumnIndex) {
+        this.lastRowIndex = lastRowIndex;
+        this.lastColumnIndex = lastColumnIndex;
+    }
+
+    normalize() {
+        return {
+            from: [0, 0],
+            to: [this.lastRowIndex, this.lastColumnIndex]
+        };
     }
 }
 

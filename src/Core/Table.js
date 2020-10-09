@@ -3,7 +3,7 @@ import throttle from 'lodash/throttle';
 import Canvas from './Canvas';
 import VerticalScrollBar from './VerticalScrollBar';
 import HorizontalScrollBar from './HorizontalScrollBar';
-import { CellRange } from './DataSet';
+import { CellRange, ColumnRange, FullRange, RowRange } from './DataSet';
 import { Config } from '@/Config';
 
 function createTable(width = -1, height = -1) {
@@ -107,26 +107,68 @@ class Table {
     onMouseDown = (x, y) => {
         const index = this.getIndex(x, y);
 
-        if (index !== null) {
-            this.dataSet.setSelected(new CellRange(index, index));
-            this.render();
+        if (index === null) {
+            return;
         }
+
+        const [xIndex, yIndex] = index;
+
+        if (xIndex === -1 && yIndex === -1) {
+            this.dataSet.setSelected(new FullRange());
+        } else if (xIndex === -1) {
+            this.dataSet.setSelected(new ColumnRange(yIndex, yIndex));
+        } else if (yIndex === -1) {
+            this.dataSet.setSelected(new RowRange(xIndex, xIndex));
+        } else {
+            this.dataSet.setSelected(new CellRange(index, index));
+        }
+
+        this.render();
     };
 
     onMouseUp = (x, y) => {
         const index = this.getIndex(x, y);
+        const selected = this.dataSet.getSelected();
 
-        if (index !== null) {
-            this.dataSet.setSelected({ to: index });
-            this.render();
+        if (index === null || selected instanceof FullRange) {
+            return;
         }
+
+        const [xIndex, yIndex] = index;
+
+        if (selected instanceof ColumnRange) {
+            this.dataSet.setSelected({ to: yIndex });
+        } else if (selected instanceof RowRange) {
+            this.dataSet.setSelected({ to: xIndex });
+        } else if (selected instanceof CellRange) {
+            this.dataSet.setSelected({ to: index });
+        }
+
+        this.render();
     };
 
     onMouseMove = (x, y) => {
         const index = this.getIndex(x, y);
+        const selected = this.dataSet.getSelected();
 
-        if (index !== null) {
-            const toIndex = this.dataSet.getSelected().to;
+        if (index === null) {
+            return;
+        }
+
+        const [xIndex, yIndex] = index;
+        const toIndex = this.dataSet.getSelected().to;
+
+        if (selected instanceof ColumnRange) {
+            if (toIndex !== yIndex) {
+                this.dataSet.setSelected({ to: yIndex });
+                this.render();
+            }
+        } else if (selected instanceof RowRange) {
+            if (toIndex !== xIndex) {
+                this.dataSet.setSelected({ to: xIndex });
+                this.render();
+            }
+        } else if (selected instanceof CellRange) {
             if (toIndex[0] !== index[0] || toIndex[1] !== index[1]) {
                 this.dataSet.setSelected({ to: index });
                 this.render();
