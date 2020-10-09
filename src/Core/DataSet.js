@@ -94,7 +94,7 @@ class DataSet {
         this.width += blankWidth;
         this.height += blankHeight;
 
-        this.setSelected(new CellRange(0, 0));
+        this.setSelected(new CellRange([0, 0], [0, 0]));
     }
 
     getWidth() {
