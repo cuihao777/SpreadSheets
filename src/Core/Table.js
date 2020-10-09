@@ -95,7 +95,6 @@ class Table {
         this.canvas.addEventListener({
             "mousewheel": this.onMouseWheel,
             "mousedown": this.onMouseDown,
-            // "mouseup": this.onMouseUp, 感觉没什么意义
             "mousemove": this.onMouseMove,
         });
     }
@@ -104,7 +103,7 @@ class Table {
         this.render();
     }
 
-    onMouseDown = (x, y) => {
+    onMouseDown = (x, y, event) => {
         const index = this.getIndex(x, y);
 
         if (index === null) {
@@ -117,40 +116,46 @@ class Table {
         const isLineNoArea = yIndex < firstColumnIndex;
         const isTopLeftArea = isHeaderArea && isLineNoArea;
 
-        if (isTopLeftArea) {
-            this.dataSet.setSelected(new FullRange());
-        } else if (isHeaderArea) {
-            this.dataSet.setSelected(new ColumnRange(yIndex, yIndex));
-        } else if (isLineNoArea) {
-            this.dataSet.setSelected(new RowRange(xIndex, xIndex));
+        if (event.shiftKey) {
+            const selected = this.dataSet.getSelected();
+            const toIndex = selected.to;
+
+            if (selected instanceof ColumnRange) {
+                const isDifferent = toIndex !== yIndex;
+
+                if (isDifferent && !isTopLeftArea && !isLineNoArea) {
+                    this.dataSet.setSelected({ to: yIndex });
+                    this.render();
+                }
+            } else if (selected instanceof RowRange) {
+                const isDifferent = toIndex !== xIndex;
+
+                if (isDifferent && !isTopLeftArea && !isHeaderArea) {
+                    this.dataSet.setSelected({ to: xIndex });
+                    this.render();
+                }
+            } else if (selected instanceof CellRange) {
+                const isDifferent = toIndex[0] !== index[0] || toIndex[1] !== index[1];
+
+                if (isDifferent && !isTopLeftArea && !isLineNoArea && !isHeaderArea) {
+                    this.dataSet.setSelected({ to: index });
+                    this.render();
+                }
+            }
         } else {
-            this.dataSet.setSelected(new CellRange(index, index));
+            if (isTopLeftArea) {
+                this.dataSet.setSelected(new FullRange());
+            } else if (isHeaderArea) {
+                this.dataSet.setSelected(new ColumnRange(yIndex, yIndex));
+            } else if (isLineNoArea) {
+                this.dataSet.setSelected(new RowRange(xIndex, xIndex));
+            } else {
+                this.dataSet.setSelected(new CellRange(index, index));
+            }
         }
 
         this.render();
     };
-
-    // 感觉没什么意义
-    // onMouseUp = (x, y) => {
-    //     const index = this.getIndex(x, y);
-    //     const selected = this.dataSet.getSelected();
-    //
-    //     if (index === null || selected instanceof FullRange) {
-    //         return;
-    //     }
-    //
-    //     const [xIndex, yIndex] = index;
-    //
-    //     if (selected instanceof ColumnRange) {
-    //         this.dataSet.setSelected({ to: yIndex });
-    //     } else if (selected instanceof RowRange) {
-    //         this.dataSet.setSelected({ to: xIndex });
-    //     } else if (selected instanceof CellRange) {
-    //         this.dataSet.setSelected({ to: index });
-    //     }
-    //
-    //     this.render();
-    // };
 
     onMouseMove = (x, y) => {
         const index = this.getIndex(x, y);

@@ -221,7 +221,7 @@ class Canvas {
                     startY = event.pageY;
                     baseX = event.offsetX;
                     baseY = event.offsetY;
-                    fn.call(this, baseX, baseY);
+                    fn.call(this, baseX, baseY, event);
                 }
             };
         })();
