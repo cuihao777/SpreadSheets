@@ -95,7 +95,7 @@ class Table {
         this.canvas.addEventListener({
             "mousewheel": this.onMouseWheel,
             "mousedown": this.onMouseDown,
-            "mouseup": this.onMouseUp,
+            // "mouseup": this.onMouseUp, 感觉没什么意义
             "mousemove": this.onMouseMove,
         });
     }
@@ -130,26 +130,27 @@ class Table {
         this.render();
     };
 
-    onMouseUp = (x, y) => {
-        const index = this.getIndex(x, y);
-        const selected = this.dataSet.getSelected();
-
-        if (index === null || selected instanceof FullRange) {
-            return;
-        }
-
-        const [xIndex, yIndex] = index;
-
-        if (selected instanceof ColumnRange) {
-            this.dataSet.setSelected({ to: yIndex });
-        } else if (selected instanceof RowRange) {
-            this.dataSet.setSelected({ to: xIndex });
-        } else if (selected instanceof CellRange) {
-            this.dataSet.setSelected({ to: index });
-        }
-
-        this.render();
-    };
+    // 感觉没什么意义
+    // onMouseUp = (x, y) => {
+    //     const index = this.getIndex(x, y);
+    //     const selected = this.dataSet.getSelected();
+    //
+    //     if (index === null || selected instanceof FullRange) {
+    //         return;
+    //     }
+    //
+    //     const [xIndex, yIndex] = index;
+    //
+    //     if (selected instanceof ColumnRange) {
+    //         this.dataSet.setSelected({ to: yIndex });
+    //     } else if (selected instanceof RowRange) {
+    //         this.dataSet.setSelected({ to: xIndex });
+    //     } else if (selected instanceof CellRange) {
+    //         this.dataSet.setSelected({ to: index });
+    //     }
+    //
+    //     this.render();
+    // };
 
     onMouseMove = (x, y) => {
         const index = this.getIndex(x, y);
@@ -161,19 +162,29 @@ class Table {
 
         const [xIndex, yIndex] = index;
         const toIndex = this.dataSet.getSelected().to;
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+        const isHeaderArea = xIndex < firstRowIndex;
+        const isLineNoArea = yIndex < firstColumnIndex;
+        const isTopLeftArea = isHeaderArea && isLineNoArea;
 
         if (selected instanceof ColumnRange) {
-            if (toIndex !== yIndex) {
+            const isDifferent = toIndex !== yIndex;
+
+            if (isDifferent && !isTopLeftArea && !isLineNoArea) {
                 this.dataSet.setSelected({ to: yIndex });
                 this.render();
             }
         } else if (selected instanceof RowRange) {
-            if (toIndex !== xIndex) {
+            const isDifferent = toIndex !== xIndex;
+
+            if (isDifferent && !isTopLeftArea && !isHeaderArea) {
                 this.dataSet.setSelected({ to: xIndex });
                 this.render();
             }
         } else if (selected instanceof CellRange) {
-            if (toIndex[0] !== index[0] || toIndex[1] !== index[1]) {
+            const isDifferent = toIndex[0] !== index[0] || toIndex[1] !== index[1];
+
+            if (isDifferent && !isTopLeftArea && !isLineNoArea && !isHeaderArea) {
                 this.dataSet.setSelected({ to: index });
                 this.render();
             }
