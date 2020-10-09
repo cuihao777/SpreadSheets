@@ -112,12 +112,16 @@ class Table {
         }
 
         const [xIndex, yIndex] = index;
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+        const isHeaderArea = xIndex < firstRowIndex;
+        const isLineNoArea = yIndex < firstColumnIndex;
+        const isTopLeftArea = isHeaderArea && isLineNoArea;
 
-        if (xIndex === -1 && yIndex === -1) {
+        if (isTopLeftArea) {
             this.dataSet.setSelected(new FullRange());
-        } else if (xIndex === -1) {
+        } else if (isHeaderArea) {
             this.dataSet.setSelected(new ColumnRange(yIndex, yIndex));
-        } else if (yIndex === -1) {
+        } else if (isLineNoArea) {
             this.dataSet.setSelected(new RowRange(xIndex, xIndex));
         } else {
             this.dataSet.setSelected(new CellRange(index, index));
@@ -555,13 +559,29 @@ class Table {
         const headerHeight = Config.Table.defaultRowHeight;
         const { defaultRowHeight, defaultColumnWidth } = Config.Table;
         const lineNoWidth = this.getLineNoWidth();
-        const clipHeight = this.canvas.size.height - headerHeight;
-        const clipWidth = this.canvas.size.width - lineNoWidth;
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
 
-        this.canvas.clipRect(lineNoWidth, headerHeight, clipWidth, clipHeight);
+        const clipRange = {
+            x: 0,
+            y: 0,
+            width: this.canvas.size.width,
+            height: this.canvas.size.height
+        };
 
         const [fRow, fColumn] = selectedRange.from;
         const [tRow, tColumn] = selectedRange.to;
+
+        if (fRow < firstRowIndex) {
+            clipRange.y = headerHeight;
+            clipRange.height -= headerHeight;
+        }
+
+        if (fColumn < firstColumnIndex) {
+            clipRange.x = lineNoWidth;
+            clipRange.width -= lineNoWidth;
+        }
+
+        this.canvas.clipRect(clipRange.x, clipRange.y, clipRange.width, clipRange.height);
 
         const from = {
             x: this.dataSet.cache.width[fColumn],
@@ -575,7 +595,6 @@ class Table {
             height: this.dataSet.getData()[tRow].height || defaultRowHeight
         };
 
-        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
         const firstCellX = this.dataSet.cache.width[firstColumnIndex];
         const firstCellY = this.dataSet.cache.height[firstRowIndex];
 
