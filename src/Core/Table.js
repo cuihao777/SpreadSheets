@@ -479,7 +479,7 @@ class Table {
         this.canvas.attr({ strokeStyle: borderColor, lineWidth: 1 });
 
         // Render Header Grid
-        this.canvas.line([0, defaultRowHeight], [rowEndpoint + lineNoWidth, defaultRowHeight])
+        this.canvas.line([0, defaultRowHeight], [rowEndpoint + lineNoWidth, defaultRowHeight]);
 
         // Render LineNo Grid
         this.canvas.line([lineNoWidth, 0], [lineNoWidth, columnEndpoint + defaultRowHeight]);
@@ -488,14 +488,22 @@ class Table {
             const row = data[i];
             const rowHeight = row.height ? row.height : defaultRowHeight;
             s += rowHeight;
-            this.canvas.line([0, s], [rowEndpoint + lineNoWidth, s])
+            this.canvas.line([0, s], [rowEndpoint + lineNoWidth, s]);
+
+            if (s > this.canvas.size.height) {
+                break;
+            }
         }
 
         for (let i = firstColumnIndex, s = lineNoWidth; i < header.length; i++) {
             let column = header[i];
             const columnWidth = column.width ? column.width : defaultColumnWidth;
             s += columnWidth;
-            this.canvas.line([s, 0], [s, columnEndpoint + defaultRowHeight])
+            this.canvas.line([s, 0], [s, columnEndpoint + defaultRowHeight]);
+
+            if (s > this.canvas.size.width) {
+                break;
+            }
         }
         this.canvas.restore();
     }

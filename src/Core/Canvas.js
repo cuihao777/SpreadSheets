@@ -256,7 +256,7 @@ class Canvas {
                     const targetY = event.pageY - startY + baseY;
                     fn.call(this, targetX, targetY, status);
                 }
-            }, 110);
+            }, 30);
         })();
 
         document.addEventListener("mousedown", onMouseDown);
