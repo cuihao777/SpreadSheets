@@ -96,12 +96,19 @@ class Table {
             "mousewheel": this.onMouseWheel,
             "mousedown": this.onMouseDown,
             "mousemove": this.onMouseMove,
+            "keydown": this.onKeyDown
         });
     }
 
     onParentNodeResize() {
         this.render();
     }
+
+    onKeyDown = ({ keyCode, ctrlKey }) => {
+        if (ctrlKey && keyCode === 67) {
+            this.copySelected();
+        }
+    };
 
     onMouseDown = (x, y, event) => {
         const index = this.getIndex(x, y);
@@ -653,9 +660,32 @@ class Table {
         return lineNoWidthCache[text];
     }
 
-    isOutOfBound(x, y) {
-        const { width, height } = this.canvas.size;
-        return x < 0 || y < 0 || x >= width || y >= height;
+    copySelected() {
+        const data = this.dataSet.getData();
+        const selected = this.dataSet.getSelected();
+        const { from, to } = selected.normalize();
+
+        let copied = '';
+
+        for (let i = from[0]; i <= to[0]; i++) {
+            const column = [];
+            for (let j = from[1]; j <= to[1]; j++) {
+                const content = data[i].cells[j];
+                column.push(content);
+            }
+            copied += (copied === '' ? '' : '\r\n') + column.join('\t');
+        }
+
+        const input = document.createElement('textarea');
+        input.style.display = 'hidden';
+        document.body.appendChild(input);
+
+        input.value = copied;
+        input.focus();
+        input.select();
+        document.execCommand && document.execCommand('copy');
+
+        document.body.removeChild(input);
     }
 }
 

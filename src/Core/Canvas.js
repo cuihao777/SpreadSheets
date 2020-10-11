@@ -49,6 +49,9 @@ class Canvas {
         this.options = { ...defaultOptions, ...options };
 
         this.el = document.createElement('canvas');
+        this.el.tabIndex = 1;
+        this.el.style.outline = 'none';
+
         this.context = this.el.getContext('2d');
         this.resize(this.options.width, this.options.height);
         this.context.scale(dpr(), dpr());
@@ -259,16 +262,30 @@ class Canvas {
             }, 30);
         })();
 
+        const onKeyDown = (function () {
+            const fn = events['keydown'] || emptyFn;
+
+            return (event) => {
+                fn.call(this, {
+                    ctrlKey: event.ctrlKey,
+                    shiftKey: event.shiftKey,
+                    keyCode: event.keyCode
+                });
+            };
+        })();
+
         document.addEventListener("mousedown", onMouseDown);
         document.addEventListener("mouseup", onMouseUp);
         document.addEventListener("mousemove", onMouseMove);
         canvas.addEventListener("mousewheel", onMouseWheel);
+        canvas.addEventListener("keydown", onKeyDown);
 
         return function remove() {
             document.removeEventListener("mousedown", onMouseDown);
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("mousemove", onMouseMove);
             canvas.removeEventListener("mousewheel", onMouseWheel);
+            canvas.removeEventListener("keydown", onKeyDown);
         };
     }
 }
