@@ -5,6 +5,7 @@ import VerticalScrollBar from './VerticalScrollBar';
 import HorizontalScrollBar from './HorizontalScrollBar';
 import { CellRange, ColumnRange, FullRange, RowRange } from './DataSet';
 import { Config } from '@/Config';
+import { parse } from '@/Clipboard/Parser';
 
 function createTable(width = -1, height = -1) {
     const el = document.createElement("div");
@@ -107,6 +108,8 @@ class Table {
     onKeyDown = ({ keyCode, ctrlKey }) => {
         if (ctrlKey && keyCode === 67) {
             this.copySelected();
+        } else if (ctrlKey && keyCode === 86) {
+            navigator.clipboard.readText().then(text => this.pasteToSelected(parse(text)));
         }
     };
 
@@ -673,7 +676,7 @@ class Table {
                 const content = data[i].cells[j];
                 column.push(content);
             }
-            copied += (copied === '' ? '' : '\r\n') + column.join('\t');
+            copied += column.join('\t') + '\r\n';
         }
 
         const input = document.createElement('textarea');
@@ -687,6 +690,39 @@ class Table {
 
         document.body.removeChild(input);
     }
+
+    pasteToSelected = (copiedData) => {
+        const selected = this.dataSet.getSelected();
+        const [startRowIndex, startColumnIndex] = selected.normalize().from;
+        const header = this.dataSet.getHeader();
+        const data = this.dataSet.getData();
+
+        const newSelectRange = {
+            from: [startRowIndex, startColumnIndex],
+            to: [startRowIndex, startColumnIndex]
+        };
+
+        for (let i = 0; (i < copiedData.length) && (startRowIndex + i < data.length); i++) {
+            const targetRowIndex = startRowIndex + i;
+            const row = copiedData[i];
+
+            if (targetRowIndex > newSelectRange.to[0]) {
+                newSelectRange.to[0] = targetRowIndex;
+            }
+
+            for (let j = 0; (j < row.length) && (startColumnIndex + j < header.length); j++) {
+                const targetColumnIndex = startColumnIndex + j;
+                data[targetRowIndex].cells[targetColumnIndex] = row[j];
+
+                if (targetColumnIndex > newSelectRange.to[1]) {
+                    newSelectRange.to[1] = targetColumnIndex;
+                }
+            }
+        }
+
+        this.dataSet.setSelected(new CellRange(newSelectRange.from, newSelectRange.to));
+        this.render();
+    };
 }
 
 const lineNoWidthCache = {};
