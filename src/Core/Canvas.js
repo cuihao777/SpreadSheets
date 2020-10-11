@@ -269,7 +269,9 @@ class Canvas {
                 fn.call(this, {
                     ctrlKey: event.ctrlKey,
                     shiftKey: event.shiftKey,
-                    keyCode: event.keyCode
+                    keyCode: event.keyCode,
+                    preventDefault: () => event.preventDefault(),
+                    stopPropagation: () => event.stopPropagation()
                 });
             };
         })();

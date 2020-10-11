@@ -105,11 +105,33 @@ class Table {
         this.render();
     }
 
-    onKeyDown = ({ keyCode, ctrlKey }) => {
+    onKeyDown = ({ keyCode, ctrlKey, preventDefault }) => {
         if (ctrlKey && keyCode === 67) {
+            // Ctrl + C
             this.copySelected();
         } else if (ctrlKey && keyCode === 86) {
-            navigator.clipboard.readText().then(text => this.pasteToSelected(parse(text)));
+            // Ctrl + V
+            navigator.clipboard.readText().then(text => {
+                if (!text.endsWith('\r\n')) {
+                    text += '\r\n';
+                }
+
+                const parsedData = parse(text);
+                const isOneCell = parsedData.length === 1 && parsedData[0].length === 1;
+
+                if (isOneCell) {
+                    this.fillToSelected(parsedData[0][0]);
+                } else {
+                    this.pasteToSelected(parsedData);
+                }
+            });
+        } else if (ctrlKey && keyCode === 68) {
+            // Ctrl + D
+            preventDefault();
+            const data = this.dataSet.getData();
+            const [rowIndex, columnIndex] = this.dataSet.getSelected().normalize().from;
+            const text = data[rowIndex].cells[columnIndex];
+            this.fillToSelected(text);
         }
     };
 
@@ -691,7 +713,7 @@ class Table {
         document.body.removeChild(input);
     }
 
-    pasteToSelected = (copiedData) => {
+    pasteToSelected(copiedData) {
         const selected = this.dataSet.getSelected();
         const [startRowIndex, startColumnIndex] = selected.normalize().from;
         const header = this.dataSet.getHeader();
@@ -722,7 +744,22 @@ class Table {
 
         this.dataSet.setSelected(new CellRange(newSelectRange.from, newSelectRange.to));
         this.render();
-    };
+    }
+
+    fillToSelected(text) {
+        const selected = this.dataSet.getSelected();
+        const [startRowIndex, startColumnIndex] = selected.normalize().from;
+        const [endRowIndex, endColumnIndex] = selected.normalize().to;
+        const data = this.dataSet.getData();
+
+        for (let i = startRowIndex; i <= endRowIndex; i++) {
+            for (let j = startColumnIndex; j <= endColumnIndex; j++) {
+                data[i].cells[j] = text;
+            }
+        }
+
+        this.render();
+    }
 }
 
 const lineNoWidthCache = {};
