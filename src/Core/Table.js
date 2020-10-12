@@ -4,6 +4,7 @@ import Canvas from './Canvas';
 import VerticalScrollBar from './VerticalScrollBar';
 import HorizontalScrollBar from './HorizontalScrollBar';
 import { CellRange, ColumnRange, FullRange, RowRange } from './DataSet';
+import InputBox from './InputBox';
 import { Config } from '@/Config';
 import { Excel } from '@/Excel';
 
@@ -55,6 +56,13 @@ class Table {
      */
     dataSet = null;
 
+    /**
+     * Input Box
+     *
+     * @type {InputBox}
+     */
+    inputBox = null;
+
     constructor(container, options) {
         const defaultOptions = {
             width: -1,
@@ -99,6 +107,10 @@ class Table {
             "mousemove": this.onMouseMove,
             "keydown": this.onKeyDown
         });
+
+        this.inputBox = new InputBox();
+        this.inputBox.show();
+        this.el.appendChild(this.inputBox.el);
     }
 
     onParentNodeResize() {

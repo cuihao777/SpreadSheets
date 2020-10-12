@@ -15,7 +15,8 @@ class HorizontalScrollBar {
             right: "0",
             left: "0",
             bottom: "0",
-            overflowX: "scroll"
+            overflowX: "scroll",
+            zIndex: "1"
         });
 
         this.content = document.createElement("div");

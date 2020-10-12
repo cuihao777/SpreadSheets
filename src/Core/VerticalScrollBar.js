@@ -15,7 +15,8 @@ class VerticalScrollBar {
             right: "0",
             top: "0",
             bottom: "0",
-            overflowY: "scroll"
+            overflowY: "scroll",
+            zIndex: "1"
         });
 
         this.content = document.createElement("div");
