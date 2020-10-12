@@ -7,16 +7,19 @@ function escape(text) {
 }
 
 export function stringify(data) {
-    let result = '';
+    let result = [];
 
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
+        const newRow = [];
+
         for (let j = 0; j < row.length; j++) {
-            const cell = row[j];
-            result += escape(cell) + "\t";
+            const cell = escape(row[j]);
+            newRow.push(cell);
         }
-        result += "\r\n";
+
+        result.push(newRow.join("\t"));
     }
 
-    return result;
+    return result.join("\r\n");
 }
