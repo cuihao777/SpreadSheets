@@ -5,7 +5,7 @@ import VerticalScrollBar from './VerticalScrollBar';
 import HorizontalScrollBar from './HorizontalScrollBar';
 import { CellRange, ColumnRange, FullRange, RowRange } from './DataSet';
 import { Config } from '@/Config';
-import { parse } from '@/Clipboard/Parser';
+import { Excel } from '@/Excel';
 
 function createTable(width = -1, height = -1) {
     const el = document.createElement("div");
@@ -116,7 +116,7 @@ class Table {
                     text += '\r\n';
                 }
 
-                const parsedData = parse(text);
+                const parsedData = Excel.parse(text);
                 const isOneCell = parsedData.length === 1 && parsedData[0].length === 1;
 
                 if (isOneCell) {
@@ -696,27 +696,9 @@ class Table {
         const selected = this.dataSet.getSelected();
         const { from, to } = selected.normalize();
 
-        let copied = '';
-
-        for (let i = from[0]; i <= to[0]; i++) {
-            const column = [];
-            for (let j = from[1]; j <= to[1]; j++) {
-                const content = data[i].cells[j];
-                column.push(content);
-            }
-            copied += column.join('\t') + '\r\n';
-        }
-
-        const input = document.createElement('textarea');
-        input.style.display = 'hidden';
-        document.body.appendChild(input);
-
-        input.value = copied;
-        input.focus();
-        input.select();
-        document.execCommand && document.execCommand('copy');
-
-        document.body.removeChild(input);
+        const selectedData = data.slice(from[0], to[0] + 1).map(row => row.cells.slice(from[1], to[1] + 1));
+        const copied = Excel.stringify(selectedData);
+        navigator.clipboard.writeText(copied).then();
     }
 
     pasteToSelected(copiedData) {

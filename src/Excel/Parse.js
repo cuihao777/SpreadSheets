@@ -19,8 +19,15 @@ function collectQuotesText(text) {
         }
 
         if (text.substr(i, 2) === '\r\n') {
-            tempText += '\r\n';
+            tempText += '\n';
             i += 2;
+            isMultiLine = true;
+            continue;
+        }
+
+        if (text.charAt(i) === '\n') {
+            tempText += '\n';
+            i++;
             isMultiLine = true;
             continue;
         }
