@@ -1,6 +1,5 @@
 import Table from "./Table";
 import DataSet from "./DataSet";
-import { watcher } from '@/Clipboard/Watcher';
 
 class SpreadSheets {
     constructor(el, options = {}) {
@@ -50,8 +49,6 @@ class SpreadSheets {
 
         this.table.setDataSet(dataSet);
         this.table.render();
-
-        watcher(() => null, document.body);
     }
 }
 

@@ -1,7 +1,48 @@
+function collectQuotesText(text) {
+    let i = 1;
+    let tempText = '';
+    let isMultiLine = false;
+
+    while (i < text.length) {
+        if (text.substr(i, 2) === '""') {
+            tempText += '"';
+            i += 2;
+            isMultiLine = true;
+            continue;
+        }
+
+        if (text.charAt(i) === '\t') {
+            tempText += '\t';
+            i++;
+            isMultiLine = true;
+            continue;
+        }
+
+        if (text.substr(i, 2) === '\r\n') {
+            tempText += '\r\n';
+            i += 2;
+            isMultiLine = true;
+            continue;
+        }
+
+        if (text.charAt(i) === '"') {
+            break;
+        }
+
+        tempText += text.charAt(i);
+        i++;
+    }
+
+    return {
+        text: isMultiLine ? tempText : `"${tempText}"`,
+        step: i + 1
+    };
+}
+
 export function parse(text) {
     const data = [];
     let row = 0;
-    let field = "";
+    let field = '';
 
     let i = 0;
     let firstColumnIndex = Number.MAX_VALUE;
@@ -39,6 +80,13 @@ export function parse(text) {
             data[row] = [];
         }
 
+        if (text.charAt(i) === '"') {
+            const result = collectQuotesText(text.substr(i));
+            field += result.text;
+            i += result.step;
+            continue;
+        }
+
         if (text.charAt(i) === '\t') {
             checkColumnBoundary();
             data[row].push(field.trim());
@@ -53,7 +101,7 @@ export function parse(text) {
             checkRowBoundary();
 
             field = "";
-            i = i + 2;
+            i += 2;
             row++;
             continue;
         }
