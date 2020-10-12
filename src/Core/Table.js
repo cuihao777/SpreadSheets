@@ -132,6 +132,12 @@ class Table {
             const [rowIndex, columnIndex] = this.dataSet.getSelected().normalize().from;
             const text = data[rowIndex].cells[columnIndex];
             this.fillToSelected(text);
+        } else if (ctrlKey && keyCode === 65) {
+            // Ctrl + A
+            if (!(this.dataSet.getSelected() instanceof FullRange)) {
+                this.dataSet.setSelected(new FullRange());
+                this.render();
+            }
         }
     };
 
