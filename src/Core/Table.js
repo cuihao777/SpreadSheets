@@ -106,7 +106,10 @@ class Table {
     }
 
     onKeyDown = ({ keyCode, ctrlKey, preventDefault }) => {
-        if (ctrlKey && keyCode === 67) {
+        if (keyCode === 46) {
+            // Del
+            this.fillToSelected("");
+        } else if (ctrlKey && keyCode === 67) {
             // Ctrl + C
             this.copySelected();
         } else if (ctrlKey && keyCode === 86) {
