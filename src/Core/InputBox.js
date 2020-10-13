@@ -47,7 +47,11 @@ class InputBox {
     }
 
     set value(v) {
-        this.el.value = v;
+        if (v === undefined || v === null) {
+            this.el.value = '';
+        } else {
+            this.el.value = v;
+        }
     }
 
     get visible() {

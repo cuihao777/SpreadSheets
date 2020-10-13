@@ -577,7 +577,7 @@ class Table {
 
                 this.canvas.attr({ fillStyle: "#000000" });
                 this.canvas.fillText({
-                    text: text,
+                    text: (text === undefined || text === null) ? '' : text,
                     ...params
                 }, rect);
 
