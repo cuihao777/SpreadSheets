@@ -114,6 +114,25 @@ class DataSet {
     }
 
     /**
+     * Get cell information from index
+     *
+     * @param rowIndex {number}
+     * @param columnIndex {number}
+     * @returns {{x: number, width: number, y: number, height: number}}
+     */
+    getCellFromIndex(rowIndex, columnIndex) {
+        const { defaultColumnWidth, defaultRowHeight } = Config.Table;
+
+        const x = this.cache.width[columnIndex];
+        const y = this.cache.height[rowIndex];
+        const width = this.header[columnIndex].width || defaultColumnWidth;
+        const height = this.data[rowIndex].height || defaultRowHeight;
+        const content = this.data[rowIndex].cells[columnIndex];
+
+        return { x, y, width, height, content };
+    }
+
+    /**
      * Get Selected Range
      *
      * @returns {SelectedRange}

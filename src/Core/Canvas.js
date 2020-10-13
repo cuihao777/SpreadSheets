@@ -276,11 +276,20 @@ class Canvas {
             };
         })();
 
+        const onDblClick = (function () {
+            const fn = events['dblclick'] || emptyFn;
+
+            return (event) => {
+                fn.call(this, event.offsetX, event.offsetY);
+            };
+        })();
+
         document.addEventListener("mousedown", onMouseDown);
         document.addEventListener("mouseup", onMouseUp);
         document.addEventListener("mousemove", onMouseMove);
         canvas.addEventListener("mousewheel", onMouseWheel);
         canvas.addEventListener("keydown", onKeyDown);
+        canvas.addEventListener("dblclick", onDblClick);
 
         return function remove() {
             document.removeEventListener("mousedown", onMouseDown);
@@ -288,6 +297,7 @@ class Canvas {
             document.removeEventListener("mousemove", onMouseMove);
             canvas.removeEventListener("mousewheel", onMouseWheel);
             canvas.removeEventListener("keydown", onKeyDown);
+            canvas.removeEventListener("dblclick", onDblClick);
         };
     }
 }

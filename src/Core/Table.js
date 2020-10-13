@@ -105,17 +105,47 @@ class Table {
             "mousewheel": this.onMouseWheel,
             "mousedown": this.onMouseDown,
             "mousemove": this.onMouseMove,
-            "keydown": this.onKeyDown
+            "keydown": this.onKeyDown,
+            "dblclick": this.onDoubleClick
         });
 
         this.inputBox = new InputBox();
-        this.inputBox.show();
         this.el.appendChild(this.inputBox.el);
+        this.inputBox.addEventListener({
+            'save': this.onInputBoxSave
+        });
     }
 
     onParentNodeResize() {
         this.render();
     }
+
+    onDoubleClick = (x, y) => {
+        const index = this.getIndex(x, y);
+
+        if (index === null) {
+            return;
+        }
+
+        const [rowIndex, columnIndex] = index;
+        const headerHeight = Config.Table.defaultRowHeight;
+        const lineNoWidth = this.getLineNoWidth();
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+
+        const { x: firstCellX, y: firstCellY } = this.dataSet.getCellFromIndex(firstRowIndex, firstColumnIndex);
+        const { x: currentCellX, y: currentCellY, width, height, content } = this.dataSet.getCellFromIndex(rowIndex, columnIndex);
+
+        const rect = {
+            x: currentCellX - firstCellX + lineNoWidth,
+            y: currentCellY - firstCellY + headerHeight,
+            width: width,
+            height: height
+        };
+
+        this.inputBox.attr(rect);
+        this.inputBox.value = content;
+        this.inputBox.show(rowIndex, columnIndex);
+    };
 
     onKeyDown = ({ keyCode, ctrlKey, preventDefault }) => {
         if (keyCode === 46) {
@@ -157,6 +187,11 @@ class Table {
     };
 
     onMouseDown = (x, y, event) => {
+        if (this.inputBox.visible) {
+            this.inputBox.save();
+            this.inputBox.close();
+        }
+
         const index = this.getIndex(x, y);
 
         if (index === null) {
@@ -369,6 +404,12 @@ class Table {
             this.dataSet.setFirstCellPositionOnViewport(firstRowIndex, firstColumnIndex);
             this.render();
         }
+    };
+
+    onInputBoxSave = (content, row, column) => {
+        const data = this.dataSet.getData();
+        data[row].cells[column] = this.inputBox.value;
+        this.render();
     };
 
     render() {
