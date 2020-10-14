@@ -132,7 +132,7 @@ class Table {
         this.startEdit(rowIndex, columnIndex)
     };
 
-    onKeyDown = ({ keyCode, ctrlKey, preventDefault }) => {
+    onKeyDown = ({ keyCode, ctrlKey, shiftKey, preventDefault }) => {
         if (keyCode === 113) {
             // F2
             const selected = this.dataSet.getSelected();
@@ -174,6 +174,14 @@ class Table {
                 this.dataSet.setSelected(new FullRange());
                 this.render();
             }
+        } else if (shiftKey && keyCode === 38) {
+            // Shift + Up
+        } else if (shiftKey && keyCode === 40) {
+            // Shift + Down
+        } else if (shiftKey && keyCode === 37) {
+            // Shift + Left
+        } else if (shiftKey && keyCode === 39) {
+            // Shift + Right
         }
     };
 
