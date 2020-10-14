@@ -3,20 +3,36 @@ import Events from 'events';
 class InputBox {
 
     /**
-     * InputBox Element
+     * InputBox Container Element
      *
-     * @type {HTMLTextAreaElement}
+     * @type {HTMLDivElement}
      */
     el = null;
 
     /**
-     * Last modified cell's index
+     * InputBox Element
      *
-     * @type {{column: number, row: number}}
+     * @type {HTMLTextAreaElement}
      */
-    lastIndex = {
-        row: -1,
-        column: -1
+    textareaEl = null;
+
+    /**
+     * Measurement Element
+     *
+     * @type {HTMLPreElement}
+     */
+    measurementEl = null;
+
+    /**
+     * Initial Information
+     *
+     * @type {{rowIndex: number, columnIndex: number, width: number, height: number}}
+     */
+    initial = {
+        rowIndex: -1,
+        columnIndex: -1,
+        width: -1,
+        height: -1
     };
 
     /**
@@ -27,7 +43,7 @@ class InputBox {
     events = new Events();
 
     constructor() {
-        this.el = document.createElement("textarea");
+        this.el = document.createElement("div");
 
         Object.assign(this.el.style, {
             position: 'absolute',
@@ -35,22 +51,55 @@ class InputBox {
             top: '0',
             zIndex: '0',
             display: 'none',
+            border: '2px solid #4b89ff',
+            boxSizing: 'border-box',
+            overflow: 'hidden'
+        });
+
+        this.textareaEl = document.createElement("textarea");
+
+        Object.assign(this.textareaEl.style, {
+            position: 'absolute',
+            left: '0',
+            top: '0',
+            zIndex: '0',
             resize: 'none',
             outline: 'none',
-            border: '2px solid #4b89ff',
-            boxSizing: 'border-box'
+            border: '0',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
+            wordWrap: 'normal',
+            margin: '0',
+            padding: '0',
+            fontSize: '13px'
         });
+
+        this.measurementEl = document.createElement("pre");
+
+        Object.assign(this.measurementEl.style, {
+            position: 'absolute',
+            border: '0',
+            boxSizing: 'border-box',
+            margin: '0',
+            padding: '0',
+            fontSize: '13px',
+            left: '-9999px',
+            top: '-9999px'
+        });
+
+        this.el.appendChild(this.textareaEl);
+        this.el.appendChild(this.measurementEl);
     }
 
     get value() {
-        return this.el.value;
+        return this.textareaEl.value;
     }
 
     set value(v) {
         if (v === undefined || v === null) {
-            this.el.value = '';
+            this.textareaEl.value = '';
         } else {
-            this.el.value = v;
+            this.textareaEl.value = v;
         }
     }
 
@@ -58,35 +107,61 @@ class InputBox {
         return this.el.style.display !== 'none';
     }
 
-    attr({ x, y, width, height }) {
-        if (x !== undefined) {
-            this.el.style.left = `${x - 1}px`;
-        }
-        if (y !== undefined) {
-            this.el.style.top = `${y - 1}px`;
-        }
-        if (width !== undefined) {
-            this.el.style.width = `${width + 2}px`;
-        }
-        if (height !== undefined) {
-            this.el.style.height = `${height + 2}px`;
-        }
+    init(value, { x, y, width, height }, { rowIndex, columnIndex }) {
+        this.initial.rowIndex = rowIndex;
+        this.initial.columnIndex = columnIndex;
+
+        this.el.style.left = `${x - 1}px`;
+        this.el.style.top = `${y - 1}px`;
+
+        this.initial.width = width;
+        this.el.style.width = `${width + 1}px`;
+        this.textareaEl.style.width = `${width - 3}px`;
+
+        this.initial.height = height;
+        this.el.style.height = `${height + 1}px`;
+        this.textareaEl.style.height = `${height - 3}px`;
+
+        this.textareaEl.value = value;
     }
 
-    show(rowIndex, columnIndex) {
-        this.lastIndex.row = rowIndex;
-        this.lastIndex.column = columnIndex;
+    show() {
         this.el.style.display = '';
-        this.el.focus();
+        this.resize();
+
+        const lastIndex = this.textareaEl.value.length;
+        this.textareaEl.scrollTop = 0;
+        this.textareaEl.setSelectionRange(lastIndex, lastIndex);
+        this.textareaEl.focus();
     }
 
     save() {
-        const { row, column } = this.lastIndex;
-        this.events.emit("save", this.value, row, column);
+        const { rowIndex, columnIndex } = this.initial;
+        this.events.emit("save", this.value, rowIndex, columnIndex);
     }
 
     close() {
         this.el.style.display = 'none';
+    }
+
+    resize() {
+        let value = this.value;
+        value += (value !== '' && value.substr(-1) === '\n' ? ' ' : '');
+        console.log(value);
+        this.measurementEl.innerHTML = value;
+
+        const minWidth = this.initial.width;
+        const minHeight = this.initial.height;
+        let width = this.measurementEl.offsetWidth + 6;
+        let height = this.measurementEl.offsetHeight + 6;
+
+        width = width < minWidth ? minWidth : width;
+        height = height < minHeight ? minHeight : height;
+
+        this.el.style.width = `${width + 1}px`;
+        this.textareaEl.style.width = `${width - 3}px`;
+        this.el.style.height = `${height + 1}px`;
+        this.textareaEl.style.height = `${height - 3}px`;
     }
 
     addEventListener(events) {
@@ -108,7 +183,10 @@ class InputBox {
             } else if (event.altKey && event.keyCode === 13) {
                 // ALT + ENTER
                 event.preventDefault();
-                // TODO: 换行
+                const { selectionStart, selectionEnd } = self.textareaEl;
+                self.textareaEl.setRangeText("\n", selectionStart, selectionEnd);
+                self.textareaEl.setSelectionRange(selectionStart + 1, selectionStart + 1);
+                self.textareaEl.dispatchEvent(new Event('input'));
             } else if (event.keyCode === 13) {
                 // ENTER
                 event.preventDefault();
@@ -117,12 +195,27 @@ class InputBox {
             }
         };
 
+        const onInput = function () {
+            self.resize();
+        };
+
+        const onMousedown = function (event) {
+            if (self.visible && event.target !== self.textareaEl) {
+                self.save();
+                self.close();
+            }
+        };
+
         self.events.on("save", onClose);
-        self.el.addEventListener("keydown", onKeydown);
+        self.textareaEl.addEventListener("keydown", onKeydown);
+        self.textareaEl.addEventListener("input", onInput);
+        document.addEventListener("mousedown", onMousedown);
 
         return function remove() {
             self.events.off("save", onClose);
-            self.el.removeEventListener("keydown", onKeydown);
+            self.textareaEl.removeEventListener("keydown", onKeydown);
+            self.textareaEl.removeEventListener("input", onInput);
+            document.removeEventListener("mousedown", onMousedown);
         };
     }
 }

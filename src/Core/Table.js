@@ -142,9 +142,8 @@ class Table {
             height: height
         };
 
-        this.inputBox.attr(rect);
-        this.inputBox.value = content;
-        this.inputBox.show(rowIndex, columnIndex);
+        this.inputBox.init(content, rect, { rowIndex, columnIndex });
+        this.inputBox.show();
     };
 
     onKeyDown = ({ keyCode, ctrlKey, preventDefault }) => {
@@ -187,11 +186,6 @@ class Table {
     };
 
     onMouseDown = (x, y, event) => {
-        if (this.inputBox.visible) {
-            this.inputBox.save();
-            this.inputBox.close();
-        }
-
         const index = this.getIndex(x, y);
 
         if (index === null) {
