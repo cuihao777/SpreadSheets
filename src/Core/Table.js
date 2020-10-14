@@ -112,7 +112,8 @@ class Table {
         this.inputBox = new InputBox();
         this.el.appendChild(this.inputBox.el);
         this.inputBox.addEventListener({
-            'save': this.onInputBoxSave
+            'save': this.onInputBoxSave,
+            'close': () => this.canvas.el.focus()
         });
     }
 
@@ -128,26 +129,17 @@ class Table {
         }
 
         const [rowIndex, columnIndex] = index;
-        const headerHeight = Config.Table.defaultRowHeight;
-        const lineNoWidth = this.getLineNoWidth();
-        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
-
-        const { x: firstCellX, y: firstCellY } = this.dataSet.getCellFromIndex(firstRowIndex, firstColumnIndex);
-        const { x: currentCellX, y: currentCellY, width, height, content } = this.dataSet.getCellFromIndex(rowIndex, columnIndex);
-
-        const rect = {
-            x: currentCellX - firstCellX + lineNoWidth,
-            y: currentCellY - firstCellY + headerHeight,
-            width: width,
-            height: height
-        };
-
-        this.inputBox.init(content, rect, { rowIndex, columnIndex });
-        this.inputBox.show();
+        this.startEdit(rowIndex, columnIndex)
     };
 
     onKeyDown = ({ keyCode, ctrlKey, preventDefault }) => {
-        if (keyCode === 46) {
+        if (keyCode === 113) {
+            // F2
+            const selected = this.dataSet.getSelected();
+            if (selected.from[0] === selected.to[0] && selected.from[1] === selected.to[1]) {
+                this.startEdit(selected.from[0], selected.from[1]);
+            }
+        } else if (keyCode === 46) {
             // Del
             this.fillToSelected("");
         } else if (ctrlKey && keyCode === 67) {
@@ -368,6 +360,11 @@ class Table {
         const data = this.dataSet.getData();
         const dataCount = data.length;
         const { defaultRowHeight, blankHeight } = Config.Table;
+
+        if (this.inputBox.visible) {
+            this.inputBox.save();
+            this.inputBox.close();
+        }
 
         if (deltaY > 0) {
             let totalHeight = 0;
@@ -797,6 +794,27 @@ class Table {
         }
 
         this.render();
+    }
+
+    startEdit(rowIndex, columnIndex) {
+        const headerHeight = Config.Table.defaultRowHeight;
+        const lineNoWidth = this.getLineNoWidth();
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+
+        const { x: firstCellX, y: firstCellY } = this.dataSet.getCellFromIndex(firstRowIndex, firstColumnIndex);
+        const { x: currentCellX, y: currentCellY, width, height, content } = this.dataSet.getCellFromIndex(rowIndex, columnIndex);
+
+        const rect = {
+            x: currentCellX - firstCellX + lineNoWidth,
+            y: currentCellY - firstCellY + headerHeight,
+            width: width,
+            height: height,
+            maxWidth: this.canvas.size.width - (currentCellX - firstCellX + lineNoWidth) - 10,
+            maxHeight: this.canvas.size.height - (currentCellY - firstCellY + headerHeight) - 10
+        };
+
+        this.inputBox.init(content, rect, { rowIndex, columnIndex });
+        this.inputBox.show();
     }
 }
 

@@ -26,13 +26,16 @@ class InputBox {
     /**
      * Initial Information
      *
-     * @type {{rowIndex: number, columnIndex: number, width: number, height: number}}
+     * @type {{rowIndex: number, columnIndex: number, width: number, maxWidth: number, height: number, maxHeight: number}}
      */
     initial = {
         rowIndex: -1,
         columnIndex: -1,
         width: -1,
-        height: -1
+        maxWidth: -1,
+        height: -1,
+        maxHeight: -1,
+        value: -1
     };
 
     /**
@@ -68,7 +71,8 @@ class InputBox {
             border: '0',
             boxSizing: 'border-box',
             overflow: 'hidden',
-            wordWrap: 'normal',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
             margin: '0',
             padding: '0',
             fontSize: '13px'
@@ -84,7 +88,9 @@ class InputBox {
             padding: '0',
             fontSize: '13px',
             left: '-9999px',
-            top: '-9999px'
+            top: '-9999px',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all'
         });
 
         this.el.appendChild(this.textareaEl);
@@ -107,20 +113,19 @@ class InputBox {
         return this.el.style.display !== 'none';
     }
 
-    init(value, { x, y, width, height }, { rowIndex, columnIndex }) {
-        this.initial.rowIndex = rowIndex;
-        this.initial.columnIndex = columnIndex;
+    init(value, { x, y, width, height, maxWidth, maxHeight }, { rowIndex, columnIndex }) {
+        this.initial = { rowIndex, columnIndex, width, height, maxWidth, maxHeight, value };
 
         this.el.style.left = `${x - 1}px`;
         this.el.style.top = `${y - 1}px`;
 
-        this.initial.width = width;
         this.el.style.width = `${width + 1}px`;
         this.textareaEl.style.width = `${width - 3}px`;
+        this.measurementEl.style.maxWidth = `${maxWidth - 3}px`;
 
-        this.initial.height = height;
         this.el.style.height = `${height + 1}px`;
         this.textareaEl.style.height = `${height - 3}px`;
+        this.measurementEl.style.maxHeight = `${maxHeight - 3}px`;
 
         this.textareaEl.value = value;
     }
@@ -136,27 +141,33 @@ class InputBox {
     }
 
     save() {
-        const { rowIndex, columnIndex } = this.initial;
-        this.events.emit("save", this.value, rowIndex, columnIndex);
+        const { rowIndex, columnIndex, value } = this.initial;
+
+        if (this.value !== value) {
+            this.events.emit("save", this.value, rowIndex, columnIndex);
+        }
     }
 
     close() {
         this.el.style.display = 'none';
+        this.events.emit("close");
     }
 
     resize() {
         let value = this.value;
         value += (value !== '' && value.substr(-1) === '\n' ? ' ' : '');
-        console.log(value);
         this.measurementEl.innerHTML = value;
 
         const minWidth = this.initial.width;
         const minHeight = this.initial.height;
+        const maxWidth = this.initial.maxWidth;
+        const maxHeight = this.initial.maxHeight;
+
         let width = this.measurementEl.offsetWidth + 6;
         let height = this.measurementEl.offsetHeight + 6;
 
-        width = width < minWidth ? minWidth : width;
-        height = height < minHeight ? minHeight : height;
+        width = width < minWidth ? minWidth : (width > maxWidth ? maxWidth : width);
+        height = height < minHeight ? minHeight : (height > maxHeight ? maxHeight : height);
 
         this.el.style.width = `${width + 1}px`;
         this.textareaEl.style.width = `${width - 3}px`;
@@ -168,10 +179,17 @@ class InputBox {
         const emptyFn = () => undefined;
         const self = this;
 
-        const onClose = (function () {
+        const onSave = (function () {
             const fn = events['save'] || emptyFn;
             return (value, row, column) => {
                 fn.call(self, value, row, column);
+            };
+        })();
+
+        const onClose = (function () {
+            const fn = events['close'] || emptyFn;
+            return () => {
+                fn.call(self);
             };
         })();
 
@@ -206,13 +224,15 @@ class InputBox {
             }
         };
 
-        self.events.on("save", onClose);
+        self.events.on("save", onSave);
+        self.events.on("close", onClose);
         self.textareaEl.addEventListener("keydown", onKeydown);
         self.textareaEl.addEventListener("input", onInput);
         document.addEventListener("mousedown", onMousedown);
 
         return function remove() {
-            self.events.off("save", onClose);
+            self.events.off("save", onSave);
+            self.events.off("close", onClose);
             self.textareaEl.removeEventListener("keydown", onKeydown);
             self.textareaEl.removeEventListener("input", onInput);
             document.removeEventListener("mousedown", onMousedown);
