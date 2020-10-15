@@ -173,16 +173,21 @@ class DataSet {
     moveTo(position, isSelecting = false, moveToNonBlank = false) {
         position = position.toLowerCase();
 
-        const offsetTable = {
-            "left": [0, -1],
-            "right": [0, 1],
-            "up": [-1, 0],
-            "down": [1, 0]
+        // [A, B, C, D]
+        // A = 0, 1 (index position)
+        // B = -1, +1 (offset)
+        // C = min index, max index (boundary point)
+        // D = >, < （compare operator）
+        const parameterTable = {
+            "left": [1, -1, 0, "<"],
+            "right": [1, 1, this.header.length - 1, ">"],
+            "up": [0, -1, 0, "<"],
+            "down": [0, 1, this.data.length - 1, ">"]
         };
 
-        const offset = offsetTable[position];
+        const parameter = parameterTable[position];
 
-        if (offset === undefined) {
+        if (parameter === undefined) {
             return;
         }
 
@@ -235,6 +240,86 @@ class DataSet {
                 this.selected.to = nextRowIndex;
             } else {
                 this.selected = new CellRange([nextRowIndex, 0], [nextRowIndex, 0]);
+            }
+        } else if (this.selected instanceof CellRange) {
+            const [indexPosition, offset, boundaryPoint, compareOperator] = parameter;
+            let nextCell = isSelecting ? [...this.selected.to] : [...this.selected.from];
+            let nextIndex = nextCell[indexPosition];
+
+            if (moveToNonBlank) {
+                const next = () => {
+                    nextIndex += offset;
+                    nextCell[indexPosition] = nextIndex;
+                };
+
+                const prev = () => {
+                    nextIndex -= offset;
+                    nextCell[indexPosition] = nextIndex;
+                };
+
+                const isIndexOverflow = () => {
+                    const [rowIndex, columnIndex] = nextCell;
+
+                    if (rowIndex < 0 || rowIndex >= this.data.length) {
+                        return true;
+                    }
+
+                    return columnIndex < 0 || columnIndex >= this.data[rowIndex].cells.length;
+                };
+
+                const isCurrentCellEmpty = () => {
+                    const [rowIndex, columnIndex] = nextCell;
+                    const text = this.data[rowIndex].cells[columnIndex];
+                    return text === undefined || text === null || text === '';
+                };
+
+                const isFirstCellEmpty = isCurrentCellEmpty();
+                next();
+                if (isIndexOverflow()) {
+                    prev();
+                } else {
+                    const isSecondCellEmpty = isCurrentCellEmpty();
+                    next();
+                    if (isIndexOverflow()) {
+                        prev();
+                    } else {
+                        while (compareOperator === ">" ? (nextIndex <= boundaryPoint) : (nextIndex >= boundaryPoint)) {
+                            if (isFirstCellEmpty && !isSecondCellEmpty) {
+                                prev();
+                                break;
+                            } else if (!isFirstCellEmpty && !isSecondCellEmpty) {
+                                if (isCurrentCellEmpty()) {
+                                    prev();
+                                    break;
+                                }
+                            } else {
+                                if (!isCurrentCellEmpty()) {
+                                    break;
+                                }
+                            }
+
+                            next();
+                        }
+
+                        if (isIndexOverflow()) {
+                            prev();
+                        }
+                    }
+                }
+            } else {
+                if (compareOperator === ">") {
+                    nextIndex = nextIndex + offset > boundaryPoint ? boundaryPoint : nextIndex + offset;
+                } else {
+                    nextIndex = nextIndex + offset < boundaryPoint ? boundaryPoint : nextIndex + offset;
+                }
+            }
+
+            nextCell[indexPosition] = nextIndex;
+
+            if (isSelecting) {
+                this.selected.to = nextCell;
+            } else {
+                this.selected = new CellRange(nextCell, nextCell);
             }
         }
     }
