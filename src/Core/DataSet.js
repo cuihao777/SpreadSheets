@@ -264,7 +264,7 @@ class DataSet {
                         return true;
                     }
 
-                    return columnIndex < 0 || columnIndex >= this.data[rowIndex].cells.length;
+                    return columnIndex < 0 || columnIndex >= this.header.length;
                 };
 
                 const isCurrentCellEmpty = () => {
