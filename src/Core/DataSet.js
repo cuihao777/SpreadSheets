@@ -169,6 +169,75 @@ class DataSet {
             }
         }
     }
+
+    moveTo(position, isSelecting = false, moveToNonBlank = false) {
+        position = position.toLowerCase();
+
+        const offsetTable = {
+            "left": [0, -1],
+            "right": [0, 1],
+            "up": [-1, 0],
+            "down": [1, 0]
+        };
+
+        const offset = offsetTable[position];
+
+        if (offset === undefined) {
+            return;
+        }
+
+        if (this.selected instanceof ColumnRange) {
+            const minColumnIndex = 0;
+            const maxColumnIndex = this.header.length - 1;
+
+            let nextColumnIndex = isSelecting ? this.selected.to : this.selected.from;
+
+            if (position === "left") {
+                if (moveToNonBlank) {
+                    nextColumnIndex = 0;
+                } else {
+                    nextColumnIndex = nextColumnIndex - 1 < minColumnIndex ? minColumnIndex : nextColumnIndex - 1;
+                }
+            } else if (position === "right") {
+                if (moveToNonBlank) {
+                    nextColumnIndex = maxColumnIndex;
+                } else {
+                    nextColumnIndex = nextColumnIndex + 1 > maxColumnIndex ? maxColumnIndex : nextColumnIndex + 1;
+                }
+            }
+
+            if (isSelecting) {
+                this.selected.to = nextColumnIndex;
+            } else {
+                this.selected = new CellRange([0, nextColumnIndex], [0, nextColumnIndex]);
+            }
+        } else if (this.selected instanceof RowRange) {
+            const minRowIndex = 0;
+            const maxRowIndex = this.data.length - 1;
+
+            let nextRowIndex = isSelecting ? this.selected.to : this.selected.from;
+
+            if (position === "up") {
+                if (moveToNonBlank) {
+                    nextRowIndex = 0;
+                } else {
+                    nextRowIndex = nextRowIndex - 1 < minRowIndex ? minRowIndex : nextRowIndex - 1;
+                }
+            } else if (position === "down") {
+                if (moveToNonBlank) {
+                    nextRowIndex = maxRowIndex;
+                } else {
+                    nextRowIndex = nextRowIndex + 1 > maxRowIndex ? maxRowIndex : nextRowIndex + 1;
+                }
+            }
+
+            if (isSelecting) {
+                this.selected.to = nextRowIndex;
+            } else {
+                this.selected = new CellRange([nextRowIndex, 0], [nextRowIndex, 0]);
+            }
+        }
+    }
 }
 
 export class SelectedRange {

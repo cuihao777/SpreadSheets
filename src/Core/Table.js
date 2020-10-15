@@ -133,7 +133,12 @@ class Table {
     };
 
     onKeyDown = ({ keyCode, ctrlKey, shiftKey, preventDefault }) => {
-        if (keyCode === 113) {
+        if ([37, 38, 39, 40].includes(keyCode)) {
+            const positionTable = { 37: "left", 38: "up", 39: "right", 40: "down" };
+            const position = positionTable[keyCode];
+            this.dataSet.moveTo(position, shiftKey, ctrlKey);
+            this.render();
+        } else if (keyCode === 113) {
             // F2
             const selected = this.dataSet.getSelected();
             if (selected.from[0] === selected.to[0] && selected.from[1] === selected.to[1]) {
@@ -174,14 +179,6 @@ class Table {
                 this.dataSet.setSelected(new FullRange());
                 this.render();
             }
-        } else if (shiftKey && keyCode === 38) {
-            // Shift + Up
-        } else if (shiftKey && keyCode === 40) {
-            // Shift + Down
-        } else if (shiftKey && keyCode === 37) {
-            // Shift + Left
-        } else if (shiftKey && keyCode === 39) {
-            // Shift + Right
         }
     };
 
