@@ -139,6 +139,58 @@ class DataSet {
         }
     }
 
+    pasteToSelected(copiedData) {
+        const [startRowIndex, startColumnIndex] = this.selected.normalize().from;
+        const header = this.header;
+        const data = this.data;
+        const newRowHeight = Config.Table.defaultRowHeight;
+
+        const insertLength = startRowIndex + copiedData.length - data.length + 1;
+
+        if (insertLength > 0) {
+            delete data[data.length - 1].placeHolder;
+            const oldLength = data.length;
+
+            for (let i = 0; i < insertLength; i++) {
+                data.push({
+                    height: newRowHeight,
+                    cells: new Array(this.header.length).fill("")
+                });
+
+                const currentRowindex = oldLength + i;
+                this.height += newRowHeight;
+                this.cache.height[currentRowindex] = this.cache.height[currentRowindex - 1] + newRowHeight;
+            }
+
+            data[data.length - 1].placeHolder = true;
+        }
+
+        const newSelectRange = {
+            from: [startRowIndex, startColumnIndex],
+            to: [startRowIndex, startColumnIndex]
+        };
+
+        for (let i = 0; (i < copiedData.length) && (startRowIndex + i < data.length); i++) {
+            const targetRowIndex = startRowIndex + i;
+            const row = copiedData[i];
+
+            if (targetRowIndex > newSelectRange.to[0]) {
+                newSelectRange.to[0] = targetRowIndex;
+            }
+
+            for (let j = 0; (j < row.length) && (startColumnIndex + j < header.length); j++) {
+                const targetColumnIndex = startColumnIndex + j;
+                data[targetRowIndex].cells[targetColumnIndex] = row[j];
+
+                if (targetColumnIndex > newSelectRange.to[1]) {
+                    newSelectRange.to[1] = targetColumnIndex;
+                }
+            }
+        }
+
+        this.setSelected(new CellRange(newSelectRange.from, newSelectRange.to));
+    }
+
     copySelected() {
         const { from, to } = this.selected.normalize();
         const selectedData = this.data.slice(from[0], to[0] + 1).map(row => row.cells.slice(from[1], to[1] + 1));
