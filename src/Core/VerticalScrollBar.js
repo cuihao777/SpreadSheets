@@ -6,6 +6,13 @@ class VerticalScrollBar {
      */
     el = null;
 
+    /**
+     * Skip scroll event once.
+     *
+     * @type {boolean}
+     */
+    skipScrollEventOnce = false;
+
     constructor() {
         this.el = document.createElement("div");
         this.el.className = "v-scrollbar";
@@ -25,25 +32,42 @@ class VerticalScrollBar {
         this.el.appendChild(this.content);
     }
 
-    addEventListener(eventName, fn) {
-        fn.callback = (event) => {
-            event.preventDefault();
+    addEventListener(events) {
+        const emptyFn = () => undefined;
 
-            if (eventName === "scroll") {
-                fn.call(this, this.top, this.height);
-            } else if (eventName === "mousewheel" && event.deltaY !== 0) {
-                fn.call(this, null, event.deltaY);
-            } else {
-                fn.call(this, event);
-            }
+        const onScroll = (function (self) {
+            const fn = events['scroll'] || emptyFn;
+            const isSkip = () => self.skipScrollEventOnce;
+            const restore = () => self.skipScrollEventOnce = false;
+
+            return (event) => {
+                if (isSkip()) {
+                    restore();
+                } else {
+                    event.preventDefault();
+                    fn.call(this, self.top, self.height);
+                }
+            };
+        })(this);
+
+        const onMouseWheel = (function () {
+            const fn = events['mousewheel'] || emptyFn;
+            return (event) => {
+                if (event.deltaY !== 0) {
+                    event.preventDefault();
+                    fn.call(this, null, event.deltaY);
+                }
+            };
+        })();
+
+        const element = this.el;
+        element.addEventListener("scroll", onScroll);
+        element.addEventListener("mousewheel", onMouseWheel);
+
+        return function remove() {
+            element.removeEventListener("scroll", onScroll);
+            element.removeEventListener("mousewheel", onMouseWheel);
         };
-
-        this.el.addEventListener(eventName, fn.callback);
-    }
-
-    removeEventListener(eventName, fn) {
-        fn = fn.callback || fn;
-        this.el.removeEventListener(eventName, fn);
     }
 
     /**
@@ -79,6 +103,7 @@ class VerticalScrollBar {
      * @param top {number}
      */
     set top(top) {
+        this.skipScrollEventOnce = true;
         this.el.scrollTop = top;
     }
 }

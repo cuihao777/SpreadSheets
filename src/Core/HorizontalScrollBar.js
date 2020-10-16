@@ -6,6 +6,13 @@ class HorizontalScrollBar {
      */
     el = null;
 
+    /**
+     * Skip scroll event once.
+     *
+     * @type {boolean}
+     */
+    skipScrollEventOnce = false;
+
     constructor() {
         this.el = document.createElement("div");
         this.el.className = "h-scrollbar";
@@ -25,17 +32,30 @@ class HorizontalScrollBar {
         this.el.appendChild(this.content);
     }
 
-    addEventListener(eventName, fn) {
-        fn.callback = () => {
-            fn.call(this, this.left, this.width);
+    addEventListener(events) {
+        const emptyFn = () => undefined;
+
+        const onScroll = (function (self) {
+            const fn = events['scroll'] || emptyFn;
+            const isSkip = () => self.skipScrollEventOnce;
+            const restore = () => self.skipScrollEventOnce = false;
+
+            return (event) => {
+                if (isSkip()) {
+                    restore();
+                } else {
+                    event.preventDefault();
+                    fn.call(this, self.left, self.width);
+                }
+            };
+        })(this);
+
+        const element = this.el;
+        element.addEventListener("scroll", onScroll);
+
+        return function remove() {
+            element.removeEventListener("scroll", onScroll);
         };
-
-        this.el.addEventListener(eventName, fn.callback);
-    }
-
-    removeEventListener(eventName, fn) {
-        fn = fn.callback || fn;
-        this.el.removeEventListener(eventName, fn);
     }
 
     /**
@@ -71,6 +91,7 @@ class HorizontalScrollBar {
      * @param left {number}
      */
     set left(left) {
+        this.skipScrollEventOnce = true;
         this.el.scrollLeft = left;
     }
 }

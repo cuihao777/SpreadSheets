@@ -86,12 +86,14 @@ class Table {
 
         this.vScroll = new VerticalScrollBar();
         this.el.appendChild(this.vScroll.el);
-        this.vScroll.addEventListener("scroll", this.onVerticalScroll);
-        this.vScroll.addEventListener("mousewheel", this.onMouseWheel);
+        this.vScroll.addEventListener({
+            "scroll": this.onVerticalScroll,
+            "mousewheel": this.onMouseWheel
+        });
 
         this.hScroll = new HorizontalScrollBar();
         this.el.appendChild(this.hScroll.el);
-        this.hScroll.addEventListener("scroll", this.onHorizontalScroll);
+        this.hScroll.addEventListener({ "scroll": this.onHorizontalScroll });
 
         this.vScroll.el.style.bottom = `${this.hScroll.el.offsetHeight}px`;
         this.hScroll.el.style.right = `${this.vScroll.el.offsetWidth}px`;
@@ -814,7 +816,7 @@ class Table {
                 this.dataSet.setFirstCellPositionOnViewport(firstCellIndex[0], columnIndex);
             }
 
-            // 在可视区域下方
+            // 在可视区域右方
             if (targetCellX + targetCellWidth - firstCell.x > visibleWidth) {
                 do {
                     firstCellIndex = this.dataSet.getFirstCellPositionOnViewport();
