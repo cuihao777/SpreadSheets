@@ -134,9 +134,10 @@ class Table {
 
     onKeyDown = ({ keyCode, ctrlKey, shiftKey, preventDefault }) => {
         if ([37, 38, 39, 40].includes(keyCode)) {
-            const positionTable = { 37: "left", 38: "up", 39: "right", 40: "down" };
-            const position = positionTable[keyCode];
-            this.dataSet.moveTo(position, shiftKey, ctrlKey);
+            const directionTable = { 37: "left", 38: "up", 39: "right", 40: "down" };
+            const direction = directionTable[keyCode];
+            const target = this.dataSet.moveTo(direction, shiftKey, ctrlKey);
+            this.moveScrollToShowCell(target.rowIndex, target.columnIndex);
             this.render();
         } else if (keyCode === 113) {
             // F2
@@ -820,6 +821,71 @@ class Table {
 
         this.inputBox.init(content, rect, { rowIndex, columnIndex });
         this.inputBox.show();
+    }
+
+    moveScrollToShowCell(rowIndex, columnIndex) {
+        const { defaultRowHeight, defaultColumnWidth } = Config.Table;
+        const visibleWidth = this.canvas.size.width - this.getLineNoWidth();
+        const visibleHeight = this.canvas.size.height - defaultRowHeight;
+
+        let firstCellIndex = this.dataSet.getFirstCellPositionOnViewport();
+        let firstCell = {
+            rowIndex: firstCellIndex[0],
+            columnIndex: firstCellIndex[1],
+            ...this.dataSet.getCellFromIndex(firstCellIndex[0], firstCellIndex[1])
+        };
+
+        if (rowIndex !== undefined) {
+            const targetCellY = this.dataSet.cache.height[rowIndex];
+            const targetCellHeight = this.dataSet.getData()[rowIndex].height || defaultRowHeight;
+
+            // 在可视区域上方
+            if (targetCellY < firstCell.y) {
+                this.dataSet.setFirstCellPositionOnViewport(rowIndex, firstCellIndex[1]);
+            }
+
+            // 在可视区域下方
+            if (targetCellY + targetCellHeight - firstCell.y > visibleHeight) {
+                do {
+                    firstCellIndex = this.dataSet.getFirstCellPositionOnViewport();
+                    this.dataSet.setFirstCellPositionOnViewport(firstCellIndex[0] + 1, firstCellIndex[1])
+                    firstCell = {
+                        rowIndex: firstCellIndex[0] + 1,
+                        columnIndex: firstCellIndex[1],
+                        ...this.dataSet.getCellFromIndex(firstCellIndex[0] + 1, firstCellIndex[1])
+                    };
+                } while (targetCellY + targetCellHeight - firstCell.y > visibleHeight);
+            }
+
+            const [firstRowIndex] = this.dataSet.getFirstCellPositionOnViewport();
+            this.vScroll.top = this.dataSet.cache.height[firstRowIndex];
+        }
+
+        if (columnIndex !== undefined) {
+            const targetCellX = this.dataSet.cache.width[columnIndex];
+            const targetCellWidth = this.dataSet.getHeader()[columnIndex].width || defaultColumnWidth;
+
+            // 在可视区域左方
+            if (targetCellX < firstCell.x) {
+                this.dataSet.setFirstCellPositionOnViewport(firstCellIndex[0], columnIndex);
+            }
+
+            // 在可视区域下方
+            if (targetCellX + targetCellWidth - firstCell.x > visibleWidth) {
+                do {
+                    firstCellIndex = this.dataSet.getFirstCellPositionOnViewport();
+                    this.dataSet.setFirstCellPositionOnViewport(firstCellIndex[0], firstCellIndex[1] + 1)
+                    firstCell = {
+                        rowIndex: firstCellIndex[0],
+                        columnIndex: firstCellIndex[1] + 1,
+                        ...this.dataSet.getCellFromIndex(firstCellIndex[0], firstCellIndex[1] + 1)
+                    };
+                } while (targetCellX + targetCellWidth - firstCell.x > visibleWidth);
+            }
+
+            const [, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
+            this.hScroll.left = this.dataSet.cache.width[firstColumnIndex];
+        }
     }
 }
 

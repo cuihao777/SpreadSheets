@@ -170,8 +170,8 @@ class DataSet {
         }
     }
 
-    moveTo(position, isSelecting = false, moveToNonBlank = false) {
-        position = position.toLowerCase();
+    moveTo(direction, isSelecting = false, moveToNonBlank = false) {
+        direction = direction.toLowerCase();
 
         // [A, B, C, D]
         // A = 0, 1 (index position)
@@ -185,7 +185,7 @@ class DataSet {
             "down": [0, 1, this.data.length - 1, ">"]
         };
 
-        const parameter = parameterTable[position];
+        const parameter = parameterTable[direction];
 
         if (parameter === undefined) {
             return;
@@ -197,13 +197,13 @@ class DataSet {
 
             let nextColumnIndex = isSelecting ? this.selected.to : this.selected.from;
 
-            if (position === "left") {
+            if (direction === "left") {
                 if (moveToNonBlank) {
                     nextColumnIndex = 0;
                 } else {
                     nextColumnIndex = nextColumnIndex - 1 < minColumnIndex ? minColumnIndex : nextColumnIndex - 1;
                 }
-            } else if (position === "right") {
+            } else if (direction === "right") {
                 if (moveToNonBlank) {
                     nextColumnIndex = maxColumnIndex;
                 } else {
@@ -211,24 +211,29 @@ class DataSet {
                 }
             }
 
+            const target = { columnIndex: nextColumnIndex };
+
             if (isSelecting) {
                 this.selected.to = nextColumnIndex;
             } else {
                 this.selected = new CellRange([0, nextColumnIndex], [0, nextColumnIndex]);
+                target.rowIndex = 0;
             }
+
+            return target;
         } else if (this.selected instanceof RowRange) {
             const minRowIndex = 0;
             const maxRowIndex = this.data.length - 1;
 
             let nextRowIndex = isSelecting ? this.selected.to : this.selected.from;
 
-            if (position === "up") {
+            if (direction === "up") {
                 if (moveToNonBlank) {
                     nextRowIndex = 0;
                 } else {
                     nextRowIndex = nextRowIndex - 1 < minRowIndex ? minRowIndex : nextRowIndex - 1;
                 }
-            } else if (position === "down") {
+            } else if (direction === "down") {
                 if (moveToNonBlank) {
                     nextRowIndex = maxRowIndex;
                 } else {
@@ -236,11 +241,16 @@ class DataSet {
                 }
             }
 
+            const target = { rowIndex: nextRowIndex };
+
             if (isSelecting) {
                 this.selected.to = nextRowIndex;
             } else {
                 this.selected = new CellRange([nextRowIndex, 0], [nextRowIndex, 0]);
+                target.columnIndex = 0;
             }
+
+            return target;
         } else if (this.selected instanceof CellRange) {
             const [indexPosition, offset, boundaryPoint, compareOperator] = parameter;
             let nextCell = isSelecting ? [...this.selected.to] : [...this.selected.from];
@@ -321,6 +331,11 @@ class DataSet {
             } else {
                 this.selected = new CellRange(nextCell, nextCell);
             }
+
+            return {
+                rowIndex: this.selected.to[0],
+                columnIndex: this.selected.to[1]
+            };
         }
     }
 }
