@@ -151,7 +151,7 @@ class Table {
             this.render();
         } else if (ctrlKey && keyCode === 67) {
             // Ctrl + C
-            this.copySelected();
+            this.dataSet.copySelected();
         } else if (ctrlKey && keyCode === 86) {
             // Ctrl + V
             navigator.clipboard.readText().then(text => {
@@ -163,7 +163,8 @@ class Table {
                 const isOneCell = parsedData.length === 1 && parsedData[0].length === 1;
 
                 if (isOneCell) {
-                    this.fillToSelected(parsedData[0][0]);
+                    this.dataSet.fillToSelected(parsedData[0][0]);
+                    this.render();
                 } else {
                     this.pasteToSelected(parsedData);
                 }
@@ -174,7 +175,8 @@ class Table {
             const data = this.dataSet.getData();
             const [rowIndex, columnIndex] = this.dataSet.getSelected().normalize().from;
             const text = data[rowIndex].cells[columnIndex];
-            this.fillToSelected(text);
+            this.dataSet.fillToSelected(text);
+            this.render();
         } else if (ctrlKey && keyCode === 65) {
             // Ctrl + A
             if (!(this.dataSet.getSelected() instanceof FullRange)) {
@@ -742,16 +744,6 @@ class Table {
         }
 
         return lineNoWidthCache[text];
-    }
-
-    copySelected() {
-        const data = this.dataSet.getData();
-        const selected = this.dataSet.getSelected();
-        const { from, to } = selected.normalize();
-
-        const selectedData = data.slice(from[0], to[0] + 1).map(row => row.cells.slice(from[1], to[1] + 1));
-        const copied = Excel.stringify(selectedData);
-        navigator.clipboard.writeText(copied).then();
     }
 
     pasteToSelected(copiedData) {

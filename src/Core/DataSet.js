@@ -1,4 +1,5 @@
-import { Config } from '@/Config'
+import { Config } from '@/Config';
+import { Excel } from "@/Excel";
 
 class DataSet {
     /**
@@ -136,6 +137,13 @@ class DataSet {
                 this.setCellData(i, j, text);
             }
         }
+    }
+
+    copySelected() {
+        const { from, to } = this.selected.normalize();
+        const selectedData = this.data.slice(from[0], to[0] + 1).map(row => row.cells.slice(from[1], to[1] + 1));
+        const copied = Excel.stringify(selectedData);
+        navigator.clipboard.writeText(copied).then();
     }
 
     getWidth() {
