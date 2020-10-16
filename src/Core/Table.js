@@ -147,7 +147,8 @@ class Table {
             }
         } else if (keyCode === 46) {
             // Del
-            this.fillToSelected("");
+            this.dataSet.fillToSelected("");
+            this.render();
         } else if (ctrlKey && keyCode === 67) {
             // Ctrl + C
             this.copySelected();
@@ -404,8 +405,7 @@ class Table {
     };
 
     onInputBoxSave = (content, row, column) => {
-        const data = this.dataSet.getData();
-        data[row].cells[column] = this.inputBox.value;
+        this.dataSet.setCellData(row, column, content);
         this.render();
     };
 
@@ -784,21 +784,6 @@ class Table {
         }
 
         this.dataSet.setSelected(new CellRange(newSelectRange.from, newSelectRange.to));
-        this.render();
-    }
-
-    fillToSelected(text) {
-        const selected = this.dataSet.getSelected();
-        const [startRowIndex, startColumnIndex] = selected.normalize().from;
-        const [endRowIndex, endColumnIndex] = selected.normalize().to;
-        const data = this.dataSet.getData();
-
-        for (let i = startRowIndex; i <= endRowIndex; i++) {
-            for (let j = startColumnIndex; j <= endColumnIndex; j++) {
-                data[i].cells[j] = text;
-            }
-        }
-
         this.render();
     }
 

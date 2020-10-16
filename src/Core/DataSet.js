@@ -72,6 +72,10 @@ class DataSet {
 
     setData(data) {
         this.data = data;
+        this.data.push({
+            placeHolder: true,
+            cells: new Array(this.header.length).fill("")
+        });
 
         const { defaultColumnWidth, defaultRowHeight } = Config.Table;
         const { blankWidth, blankHeight } = Config.Table;
@@ -95,6 +99,43 @@ class DataSet {
         this.height += blankHeight;
 
         this.setSelected(new CellRange([0, 0], [0, 0]));
+    }
+
+    setCellData(rowIndex, columnIndex, content = "") {
+        if (this.data[rowIndex] === undefined || (columnIndex < 0 || columnIndex >= this.header.length)) {
+            return;
+        }
+
+        const row = this.data[rowIndex];
+        row.cells[columnIndex] = content;
+
+        if (row.placeHolder) {
+            delete row.placeHolder;
+
+            const newRowHeight = Config.Table.defaultRowHeight;
+
+            this.data.push({
+                placeHolder: true,
+                height: newRowHeight,
+                cells: new Array(this.header.length).fill("")
+            });
+
+            const lastRowIndex = this.data.length - 1;
+
+            this.height += newRowHeight;
+            this.cache.height[lastRowIndex] = this.cache.height[lastRowIndex - 1] + newRowHeight;
+        }
+    }
+
+    fillToSelected(text) {
+        const [startRowIndex, startColumnIndex] = this.selected.normalize().from;
+        const [endRowIndex, endColumnIndex] = this.selected.normalize().to;
+
+        for (let i = startRowIndex; i <= endRowIndex; i++) {
+            for (let j = startColumnIndex; j <= endColumnIndex; j++) {
+                this.setCellData(i, j, text);
+            }
+        }
     }
 
     getWidth() {
