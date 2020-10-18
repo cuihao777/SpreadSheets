@@ -191,6 +191,52 @@ class DataSet {
         this.setSelected(new CellRange(newSelectRange.from, newSelectRange.to));
     }
 
+    insertAndPaste(copiedData) {
+        if (!(this.selected instanceof RowRange) || this.selected.from !== this.selected.to) {
+            return;
+        }
+
+        const insertRowCount = copiedData.length;
+        const columnCount = this.header.length;
+        const { defaultRowHeight } = Config.Table;
+
+        const newRows = [];
+        let increaseHeight = 0;
+
+        for (let i = 0; i < insertRowCount; i++) {
+            const newRow = {
+                height: defaultRowHeight,
+                cells: []
+            };
+
+            for (let j = 0; j < columnCount; j++) {
+                const cellContent = copiedData[i][j];
+                if (cellContent !== undefined && cellContent !== null && cellContent !== '') {
+                    newRow.cells[j] = cellContent;
+                } else {
+                    newRow.cells[j] = '';
+                }
+            }
+
+            newRows.push(newRow);
+            increaseHeight += defaultRowHeight;
+        }
+
+        const insertIndex = this.selected.from;
+
+        this.data.splice(insertIndex, 0, ...newRows);
+
+        this.height += increaseHeight;
+
+        for (let i = insertIndex; i < this.data.length; i++) {
+            const prevRowY = i === 0 ? 0 : this.cache.height[i - 1];
+            const prevRowHeight = i === 0 ? 0 : (this.data[i - 1].height || defaultRowHeight);
+            this.cache.height[i] = prevRowY + prevRowHeight;
+        }
+
+        this.selected.to = this.selected.from + insertRowCount - 1;
+    }
+
     copySelected() {
         const { from, to } = this.selected.normalize();
         const selectedData = this.data.slice(from[0], to[0] + 1).map(row => row.cells.slice(from[1], to[1] + 1));

@@ -150,6 +150,7 @@ class Table {
         } else if (keyCode === 46) {
             // Del
             this.dataSet.fillToSelected("");
+            this.vScroll.height = this.dataSet.getHeight();
             this.render();
         } else if (ctrlKey && keyCode === 67) {
             // Ctrl + C
@@ -169,6 +170,7 @@ class Table {
                 } else {
                     this.dataSet.pasteToSelected(parsedData);
                 }
+                this.vScroll.height = this.dataSet.getHeight();
                 this.render();
             });
         } else if (ctrlKey && keyCode === 68) {
@@ -178,6 +180,7 @@ class Table {
             const [rowIndex, columnIndex] = this.dataSet.getSelected().normalize().from;
             const text = data[rowIndex].cells[columnIndex];
             this.dataSet.fillToSelected(text);
+            this.vScroll.height = this.dataSet.getHeight();
             this.render();
         } else if (ctrlKey && keyCode === 65) {
             // Ctrl + A
@@ -185,6 +188,19 @@ class Table {
                 this.dataSet.setSelected(new FullRange());
                 this.render();
             }
+        } else if (shiftKey && keyCode === 45) {
+            // Shift + Insert
+            navigator.clipboard.readText().then(text => {
+                if (!text.endsWith('\r\n')) {
+                    text += '\r\n';
+                }
+
+                const parsedData = Excel.parse(text);
+
+                this.dataSet.insertAndPaste(parsedData);
+                this.vScroll.height = this.dataSet.getHeight();
+                this.render();
+            });
         }
     };
 
@@ -410,6 +426,7 @@ class Table {
 
     onInputBoxSave = (content, row, column) => {
         this.dataSet.setCellData(row, column, content);
+        this.vScroll.height = this.dataSet.getHeight();
         this.render();
     };
 
