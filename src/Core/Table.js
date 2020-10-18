@@ -152,6 +152,11 @@ class Table {
             if (selected.from[0] === selected.to[0] && selected.from[1] === selected.to[1]) {
                 this.startEdit(selected.from[0], selected.from[1]);
             }
+        } else if (shiftKey && keyCode === 46) {
+            // Shift + Delete
+            this.dataSet.deleteSelectedRows();
+            this.vScroll.height = this.dataSet.getHeight();
+            this.render();
         } else if (keyCode === 46) {
             // Del
             this.dataSet.fillToSelected("");

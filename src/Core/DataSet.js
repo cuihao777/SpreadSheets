@@ -237,6 +237,45 @@ class DataSet {
         this.selected.to = this.selected.from + insertRowCount - 1;
     }
 
+    deleteSelectedRows() {
+        if (!(this.selected instanceof RowRange)) {
+            return;
+        }
+
+        const selected = this.selected;
+        const fromIndex = selected.from < selected.to ? selected.from : selected.to;
+        let toIndex = selected.to > selected.from ? selected.to : selected.from;
+        const placeHolderIndex = this.data.length - 1;
+        toIndex = toIndex === placeHolderIndex ? toIndex - 1 : toIndex;
+        const deleteRowCount = toIndex - fromIndex + 1;
+
+        if (deleteRowCount === 0) {
+            return;
+        }
+
+        let decreaseHeight = 0;
+        const { defaultRowHeight } = Config.Table;
+
+        for (let i = fromIndex; i <= toIndex; i++) {
+            const height = this.data[i].height || defaultRowHeight;
+            decreaseHeight += height;
+        }
+
+        this.data.splice(fromIndex, deleteRowCount);
+
+        this.height -= decreaseHeight;
+
+        this.cache.height.splice(-deleteRowCount, deleteRowCount);
+
+        for (let i = fromIndex; i < this.data.length; i++) {
+            const prevRowY = i === 0 ? 0 : this.cache.height[i - 1];
+            const prevRowHeight = i === 0 ? 0 : (this.data[i - 1].height || defaultRowHeight);
+            this.cache.height[i] = prevRowY + prevRowHeight;
+        }
+
+        this.setSelected(new RowRange(fromIndex, fromIndex));
+    }
+
     copySelected() {
         const { from, to } = this.selected.normalize();
         const selectedData = this.data.slice(from[0], to[0] + 1).map(row => row.cells.slice(from[1], to[1] + 1));
