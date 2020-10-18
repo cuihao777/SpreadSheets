@@ -131,6 +131,11 @@ class Table {
         }
 
         const [rowIndex, columnIndex] = index;
+
+        if (rowIndex === -1 || columnIndex === -1) {
+            return;
+        }
+
         this.startEdit(rowIndex, columnIndex)
     };
 
