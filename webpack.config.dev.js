@@ -14,5 +14,9 @@ module.exports = (env = {}) => {
         hot: true
     };
 
+    config.entry = {
+        app: './src/index.js'
+    };
+
     return config;
 };

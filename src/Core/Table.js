@@ -72,7 +72,7 @@ class Table {
         this.options = { ...defaultOptions, ...options };
 
         this.el = createTable(this.options.width, this.options.height);
-        this.container = container;
+        this.container = container instanceof HTMLElement ? container : document.querySelector(container);
         this.container.appendChild(this.el);
 
         this.onParentNodeResize = throttle(this.onParentNodeResize, 100);

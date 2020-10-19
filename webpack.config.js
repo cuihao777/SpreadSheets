@@ -68,7 +68,7 @@ module.exports = (env = { prod: false }) => ({
         }
     },
     entry: {
-        app: './src/index.js'
+        app: './src/Core/SpreadSheets.js'
     },
     output: {
         filename: '[name].[hash].bundle.js',
