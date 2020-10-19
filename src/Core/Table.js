@@ -141,6 +141,8 @@ class Table {
 
     onKeyDown = ({ keyCode, ctrlKey, shiftKey, preventDefault }) => {
         if ([37, 38, 39, 40].includes(keyCode)) {
+            // Up, Down, Left, Right
+            preventDefault();
             const directionTable = { 37: "left", 38: "up", 39: "right", 40: "down" };
             const direction = directionTable[keyCode];
             const target = this.dataSet.moveTo(direction, shiftKey, ctrlKey);
