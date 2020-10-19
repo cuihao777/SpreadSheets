@@ -130,9 +130,10 @@ class Table {
             return;
         }
 
+        const [firstRowIndex, firstColumnIndex] = this.dataSet.getFirstCellPositionOnViewport();
         const [rowIndex, columnIndex] = index;
 
-        if (rowIndex === -1 || columnIndex === -1) {
+        if (rowIndex < firstRowIndex || columnIndex < firstColumnIndex) {
             return;
         }
 
