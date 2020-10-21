@@ -47,6 +47,7 @@ class InputBox {
 
     constructor() {
         this.el = document.createElement("div");
+        this.el.className = "input-box";
 
         Object.assign(this.el.style, {
             position: 'absolute',

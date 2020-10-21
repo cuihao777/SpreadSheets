@@ -31,40 +31,20 @@ body {
         overflow: hidden;
     }
 
-    .v-scrollbar {
-    }
-}
+    & > .input-box {
+        line-height: normal;
+        border-radius: 0;
 
-table.test {
-    border: 1px solid black;
-    padding: 0;
-    margin: 0;
-    border-collapse: separate;
-    border-spacing: 0;
-
-    tr {
-        padding: 0;
-        margin: 0;
-        height: 30px;
-
-        &:last-child {
-            border-bottom: 0;
-
-            td {
-                border-bottom: 0;
-            }
+        & > textarea {
+            line-height: inherit;
+            border-radius: inherit;
+            font-family: Arial, serif !important;
         }
 
-        td {
-            border-right: 1px solid black;
-            border-bottom: 1px solid black;
-            padding: 0 8px;
-            margin: 0;
-            font-size: 12px;
-
-            &:last-child {
-                border-right: 0;
-            }
+        & > pre {
+            line-height: inherit;
+            border-radius: inherit;
+            font-family: Arial, serif !important;
         }
     }
 }

@@ -137,6 +137,8 @@ class Table {
             return;
         }
 
+        this.moveScrollToShowCell(rowIndex, columnIndex);
+        this.render();
         this.startEdit(rowIndex, columnIndex)
     };
 
@@ -153,7 +155,10 @@ class Table {
             // F2
             const selected = this.dataSet.getSelected();
             if (selected.from[0] === selected.to[0] && selected.from[1] === selected.to[1]) {
-                this.startEdit(selected.from[0], selected.from[1]);
+                const targetCell = { rowIndex: selected.from[0], columnIndex: selected.from[1] };
+                this.moveScrollToShowCell(targetCell.rowIndex, targetCell.columnIndex);
+                this.render();
+                this.startEdit(targetCell.rowIndex, targetCell.columnIndex);
             }
         } else if (shiftKey && keyCode === 46) {
             // Shift + Delete
