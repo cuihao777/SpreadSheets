@@ -1,5 +1,6 @@
 import { Config } from '@/Config';
 import { Excel } from "@/Excel";
+import cloneDeep from 'lodash/cloneDeep';
 
 class DataSet {
     /**
@@ -15,6 +16,13 @@ class DataSet {
      * @type {array}
      */
     data = [];
+
+    /**
+     * Origin Data
+     *
+     * @type {array}
+     */
+    originData = [];
 
     /**
      * Total Width
@@ -71,8 +79,12 @@ class DataSet {
         return this.data;
     }
 
+    getOriginData() {
+        return this.originData;
+    }
+
     setData(data) {
-        this.data = data;
+        this.data = cloneDeep(data);
         this.data.push({
             placeHolder: true,
             cells: new Array(this.header.length).fill("")
@@ -100,6 +112,8 @@ class DataSet {
         this.height += blankHeight;
 
         this.setSelected(new CellRange([0, 0], [0, 0]));
+
+        this.originData = cloneDeep(data);
     }
 
     setCellData(rowIndex, columnIndex, content = "") {

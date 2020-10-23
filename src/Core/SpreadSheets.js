@@ -1,5 +1,5 @@
 import Table from "./Table";
-import DataSet from "./DataSet";
+import DataSet, { CellRange, ColumnRange, FullRange, RowRange } from "./DataSet";
 import '../css/index.scss';
 
 export {
@@ -7,7 +7,14 @@ export {
     DataSet
 }
 
-const SpreadSheets = { Table, DataSet };
+const SpreadSheets = {
+    Table,
+    DataSet,
+    CellRange,
+    RowRange,
+    ColumnRange,
+    FullRange
+};
 
 window.SpreadSheets = SpreadSheets;
 
