@@ -1,7 +1,6 @@
 {
-    "name": "spread_sheets",
+    "name": "@cuihao777/spread_sheets",
     "version": "1.0.0",
-    "private": true,
     "author": "cuihao",
     "license": "MIT",
     "scripts": {
